@@ -3,34 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>هوش مصنوعی گفتگوی فارسی پیشرفته</title>
+    <title>هوش مصنوعی چت فارسی</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             margin: 0;
             padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
         }
         .container {
-            max-width: 1000px;
-            margin: 0 auto;
+            width: 100%;
+            max-width: 800px;
             background: white;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
         header {
-            background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
             color: white;
-            padding: 25px;
+            padding: 20px;
             text-align: center;
         }
         .chat-container {
-            padding: 20px;
-            height: 500px;
+            height: 400px;
             overflow-y: auto;
+            padding: 15px;
             background: #f9f9f9;
         }
         .message {
@@ -45,51 +46,47 @@
         }
         .message-content {
             max-width: 70%;
-            padding: 12px 18px;
+            padding: 10px 15px;
             border-radius: 18px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         .user-message .message-content {
-            background: #e3f2fd;
+            background: #dcf8c6;
             border-top-right-radius: 5px;
         }
         .ai-message .message-content {
-            background: #f5f5f5;
+            background: white;
             border-top-left-radius: 5px;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
         }
         .input-area {
-            padding: 20px;
+            padding: 15px;
             background: white;
             border-top: 1px solid #eee;
+            display: flex;
         }
         input {
-            width: calc(100% - 120px);
+            flex: 1;
             padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 25px;
-            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
         }
         button {
-            background: #4e54c8;
+            background: #4b6cb7;
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            cursor: pointer;
+            padding: 12px 20px;
+            border-radius: 20px;
             margin-right: 10px;
-        }
-        .loading {
-            text-align: center;
-            color: #666;
-            font-style: italic;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>هوش مصنوعی گفتگوی پیشرفته فارسی</h1>
-            <p>سیستم هوشمند درک و پردازش زبان طبیعی با قابلیت گفتگوی انسانی</p>
+            <h1>هوش مصنوعی چت فارسی</h1>
+            <p>یک سیستم گفتگوی هوشمند مبتنی بر JavaScript</p>
         </header>
         
         <div class="chat-container" id="chat-box">
@@ -101,447 +98,93 @@
         </div>
         
         <div class="input-area">
-            <input type="text" id="user-input" placeholder="پیام خود را وارد کنید...">
-            <button onclick="sendMessage()">ارسال</button>
+            <input type="text" id="user-input" placeholder="پیام خود را وارد کنید..." autocomplete="off">
+            <button onclick="processMessage()">ارسال</button>
         </div>
     </div>
 
-    <!-- کتابخانه‌های ضروری -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.3"></script>
-    <script src="https://cdn.jsdelivr.net/npm/brain.js@2.0.0-beta/dist/browser.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/compromise/14.0.0/compromise.min.js"></script>
-    
     <script>
-        // پایگاه داده دانش و حافظه هوش مصنوعی
-        class PersianAIMemory {
-            constructor() {
-                this.conversations = new Map();
-                this.knowledgeBase = {
-                    greetings: ['سلام', 'درود', 'سلامتی', 'علیک', 'hello', 'hi'],
-                    farewells: ['خداحافظ', 'بای', 'خدانگهدار', 'goodbye', 'bye'],
-                    questions: ['چطور', 'چگونه', 'چرا', 'کی', 'کجا', 'چه', 'چقد'],
-                    emotions: {
-                        positive: ['خوشحال', 'عالی', 'فوقالعاده', 'ممنون', 'متشکر'],
-                        negative: ['ناراحت', 'غمگین', 'عصبانی', 'بد', 'ضعیف']
-                    }
-                };
-                
-                this.patterns = {
-                    math: /\d+[\+\-\*\/]\d+/,
-                    question: /(چطور|چگونه|چرا|کی|کجا|چه|چقد)/,
-                    greeting: /(سلام|درود|سلامتی|علیک)/,
-                    farewell: /(خداحافظ|بای|خدانگهدار)/
-                };
+        // پایگاه داده دانش هوش مصنوعی
+        const knowledgeBase = {
+            greetings: {
+                patterns: ["سلام", "درود", "سلامتی", "علیک", "hello", "hi"],
+                responses: [
+                    "سلام! چطور می‌تونم کمک تون کنم؟",
+                    "درود! خوشحالم که باهات گفتگو می‌کنم.",
+                    "سلام بر شما! چه سوالی دارید؟"
+                ]
+            },
+            farewells: {
+                patterns: ["خداحافظ", "بای", "خدانگهدار", "goodbye", "bye"],
+                responses: [
+                    "خداحافظ! امیدوارم باز هم ببینمت.",
+                    "بدرود! همیشه در خدمت شما هستم.",
+                    "خدانگهدار! روز خوبی داشته باشید."
+                ]
+            },
+            questions: {
+                patterns: ["چطور", "چگونه", "چرا", "کی", "کجا", "چه", "چقد"],
+                responses: [
+                    "این سوال خوبیه! می‌تونم کمکت کنم.",
+                    "اجازه بده در مورد این موضوع فکر کنم.",
+                    "منظورت رو متوجه شدم. بذار جواب مناسبی برات پیدا کنم."
+                ]
+            },
+            math: {
+                patterns: ["محاسبه", "ریاضی", "جمع", "تفریق", "ضرب", "تقسیم", "بعلاوه", "منهای"],
+                responses: [
+                    "من در حل مسائل ریاضی می‌تونم کمکت کنم.",
+                    "بیا این مسئله ریاضی رو با هم حل کنیم.",
+                    "ریاضیات یکی از نقاط قوت منه!"
+                ]
             }
-            
-            // تحلیل احساسات متن فارسی
-            analyzeSentiment(text) {
-                const words = text.split(' ');
-                let score = 0;
-                
-                words.forEach(word => {
-                    if (this.knowledgeBase.emotions.positive.includes(word)) score++;
-                    if (this.knowledgeBase.emotions.negative.includes(word)) score--;
-                });
-                
-                return score > 0 ? 'positive' : score < 0 ? 'negative' : 'neutral';
-            }
-            
-            // تشخیص نوع پیام
-            detectIntent(text) {
-                if (this.patterns.math.test(text)) return 'math';
-                if (this.patterns.question.test(text)) return 'question';
-                if (this.patterns.greeting.test(text)) return 'greeting';
-                if (this.patterns.farewell.test(text)) return 'farewell';
-                return 'general';
-            }
-            
-            // ذخیره تاریخچه مکالمه
-            saveConversation(sessionId, message, response) {
-                if (!this.conversations.has(sessionId)) {
-                    this.conversations.set(sessionId, []);
-                }
-                this.conversations.get(sessionId).push({
-                    message,
-                    response,
-                    timestamp: Date.now()
-                });
-            }
-        }
+        };
 
-        // پردازش زبان طبیعی فارسی
-        class PersianNLP {
-            constructor() {
-                this.sentimentModel = null;
-                this.encoder = null;
-                this.init();
-            }
+        // تابع تشخیص الگو در پیام کاربر
+        function detectIntent(message) {
+            const lowerMessage = message.toLowerCase();
             
-            async init() {
-                // بارگذاری مدل‌های لازم
-                try {
-                    this.encoder = await use.load();
-                    console.log('مدل پردازش زبان بارگذاری شد');
-                } catch (error) {
-                    console.error('خطا در بارگذاری مدل:', error);
-                }
-            }
-            
-            // تجزیه و تحلیل متن فارسی
-            async analyze(text) {
-                const embeddings = await this.encoder.embed([text]);
-                const embeddingArray = await embeddings.array();
-                
-                return {
-                    embedding: embeddingArray[0],
-                    tokens: this.tokenize(text),
-                    sentiment: this.analyzeSentiment(text),
-                    entities: this.extractEntities(text)
-                };
-            }
-            
-            // تجزیه متن به توکن‌های فارسی
-            tokenize(text) {
-                return text.split(/\s+/).filter(token => token.length > 0);
-            }
-            
-            // تحلیل احساسات متن
-            analyzeSentiment(text) {
-                const positiveWords = ['خوب', 'عالی', 'ممتاز', 'عالی', 'فوقالعاده'];
-                const negativeWords = ['بد', 'ضعیف', 'بی‌کیفیت', 'مشکل', 'خطا'];
-                
-                let positiveCount = 0;
-                let negativeCount = 0;
-                
-                positiveWords.forEach(word => {
-                    if (text.includes(word)) positiveCount++;
-                });
-                
-                negativeWords.forEach(word => {
-                    if (text.includes(word)) negativeCount++;
-                });
-                
-                return positiveCount > negativeCount ? 'positive' : 
-                       negativeCount > positiveCount ? 'negative' : 'neutral';
-            }
-            
-            // استخراج موجودیت‌های نامدار از متن
-            extractEntities(text) {
-                const doc = nlp(text);
-                return {
-                    people: doc.people().out('array'),
-                    places: doc.places().out('array'),
-                    organizations: doc.organizations().out('array')
-                };
-            }
-        }
-
-        // شبکه عصبی برای تولید پاسخ
-        class NeuralResponseGenerator {
-            constructor() {
-                this.net = new brain.recurrent.LSTM();
-                this.trainingData = [];
-                this.isTrained = false;
-            }
-            
-            // آموزش مدل با داده‌های فارسی
-            async train() {
-                const trainingData = [
-                    { input: 'سلام', output: 'سلام! چطور می‌توانم کمک کنم؟' },
-                    { input: 'حالت چطوره', output: 'من یک هوش مصنوعی هستم، اما ممنون که پرسیدی! چطور می‌توانم به شما کمک کنم؟' },
-                    { input: 'اسم تو چیست', output: 'من یک دستیار هوش مصنوعی فارسی هستم. شما می‌توانید هر نامی که دوست دارید برایم انتخاب کنید!' },
-                    { input: 'چه کارهایی می‌توانی انجام دهی', output: 'من می‌توانم در موضوعات مختلف گفتگو کنم، سوالات شما را پاسخ دهم، در حل مسائل ریاضی کمک کنم و اطلاعات مفید ارائه دهم.' },
-                    { input: 'خداحافظ', output: 'خداحافظ! خوشحال می‌شوم اگر باز هم سوالی داشتید.' },
-                    { input: 'متشکرم', output: 'خواهش می‌کنم! همیشه در خدمت شما هستم.' }
-                ];
-                
-                this.trainingData = trainingData;
-                
-                // آموزش شبکه عصبی
-                this.net.train(trainingData, {
-                    iterations: 2000,
-                    log: true,
-                    logPeriod: 100,
-                    learningRate: 0.01
-                });
-                
-                this.isTrained = true;
-                console.log('آموزش مدل به پایان رسید');
-            }
-            
-            // تولید پاسخ بر اساس ورودی
-            generateResponse(input) {
-                if (!this.isTrained) {
-                    return 'لطفاً کمی صبر کنید، مدل در حال آموزش است...';
-                }
-                
-                return this.net.run(input);
-            }
-            
-            // افزودن داده آموزشی جدید
-            addTrainingData(input, output) {
-                this.trainingData.push({ input, output });
-                this.train(); // آموزش مجدد با داده جدید
-            }
-        }
-
-        // مدیریت گفتگو و context
-        class ConversationManager {
-            constructor() {
-                this.context = {
-                    currentTopic: '',
-                    userPreferences: {},
-                    conversationHistory: [],
-                    userMood: 'neutral'
-                };
-            }
-            
-            updateContext(userInput, aiResponse, sentiment) {
-                this.context.conversationHistory.push({
-                    user: userInput,
-                    ai: aiResponse,
-                    timestamp: Date.now(),
-                    sentiment: sentiment
-                });
-                
-                // حفظ تاریخچه در محدوده معقول
-                if (this.context.conversationHistory.length > 50) {
-                    this.context.conversationHistory.shift();
-                }
-                
-                // بروزرسانی حالت کاربر
-                this.context.userMood = sentiment;
-                
-                // تشخیص موضوع مکالمه
-                this.detectTopic(userInput);
-            }
-            
-            detectTopic(userInput) {
-                const topics = {
-                    ریاضی: ['محاسبه', 'ریاضی', 'جمع', 'تفریق', 'ضرب', 'تقسیم'],
-                    فناوری: ['کامپیوتر', 'موبایل', 'برنامه', 'نرم‌افزار', 'هوش مصنوعی'],
-                    علمی: ['علم', 'تحقیق', 'دانش', 'کشف'],
-                    ورزش: ['ورزش', 'فوتبال', 'والیبال', 'مسابقه']
-                };
-                
-                for (const [topic, keywords] of Object.entries(topics)) {
-                    if (keywords.some(keyword => userInput.includes(keyword))) {
-                        this.context.currentTopic = topic;
-                        return;
+            for (const [intent, data] of Object.entries(knowledgeBase)) {
+                for (const pattern of data.patterns) {
+                    if (lowerMessage.includes(pattern)) {
+                        return intent;
                     }
                 }
             }
             
-            getContextualResponse(userInput) {
-                const lastMessages = this.context.conversationHistory.slice(-3);
-                const context = lastMessages.map(msg => msg.user + ' ' + msg.ai).join(' ');
-                
-                return {
-                    context,
-                    shouldContinueTopic: this.shouldContinueTopic(userInput),
-                    userMood: this.context.userMood
-                };
-            }
-            
-            shouldContinueTopic(userInput) {
-                if (!this.context.currentTopic) return false;
-                
-                const topicKeywords = {
-                    ریاضی: ['محاسبه', 'ریاضی', 'عدد'],
-                    فناوری: ['کامپیوتر', 'برنامه', 'تکنولوژی'],
-                    علمی: ['تحقیق', 'دانش', 'کشف'],
-                    ورزش: ['ورزش', 'برنده', 'بازی']
-                };
-                
-                const keywords = topicKeywords[this.context.currentTopic] || [];
-                return keywords.some(keyword => userInput.includes(keyword));
-            }
+            return "unknown";
         }
 
-        // کلاس اصلی هوش مصنوعی
-        class PersianAI {
-            constructor() {
-                this.memory = new PersianAIMemory();
-                this.nlp = new PersianNLP();
-                this.responseGenerator = new NeuralResponseGenerator();
-                this.conversationManager = new ConversationManager();
-                this.sessionId = this.generateSessionId();
-                
-                this.init();
+        // تابع تولید پاسخ بر اساس قصد کاربر
+        function generateResponse(intent) {
+            if (knowledgeBase[intent]) {
+                const responses = knowledgeBase[intent].responses;
+                return responses[Math.floor(Math.random() * responses.length)];
             }
             
-            async init() {
-                console.log('در حال راه‌اندازی هوش مصنوعی فارسی...');
-                await this.responseGenerator.train();
-                console.log('هوش مصنوعی آماده استفاده است');
-            }
-            
-            generateSessionId() {
-                return 'session_' + Math.random().toString(36).substr(2, 9);
-            }
-            
-            // پردازش پیام کاربر و تولید پاسخ
-            async processMessage(userInput) {
-                // تحلیل پیام کاربر
-                const analysis = await this.nlp.analyze(userInput);
-                const intent = this.memory.detectIntent(userInput);
-                const sentiment = this.memory.analyzeSentiment(userInput);
-                
-                // دریافت context مکالمه
-                const context = this.conversationManager.getContextualResponse(userInput);
-                
-                // تولید پاسخ بر اساس قصد کاربر
-                let response;
-                
-                switch (intent) {
-                    case 'math':
-                        response = this.handleMathQuery(userInput);
-                        break;
-                    case 'greeting':
-                        response = this.handleGreeting();
-                        break;
-                    case 'farewell':
-                        response = this.handleFarewell();
-                        break;
-                    case 'question':
-                        response = await this.handleQuestion(userInput, context);
-                        break;
-                    default:
-                        response = this.responseGenerator.generateResponse(userInput);
-                }
-                
-                // تطبیق پاسخ با حالت احساسی کاربر
-                response = this.adaptToSentiment(response, sentiment);
-                
-                // بروزرسانی context مکالمه
-                this.conversationManager.updateContext(userInput, response, sentiment);
-                
-                // ذخیره مکالمه
-                this.memory.saveConversation(this.sessionId, userInput, response);
-                
-                return response;
-            }
-            
-            // پردازش سوالات ریاضی
-            handleMathQuery(query) {
-                try {
-                    // حذف کاراکترهای غیر ضروری
-                    const mathExpression = query.replace(/[^\d\+\-\*\/\(\)\.]/g, '');
-                    
-                    if (!mathExpression) {
-                        return 'عبارت ریاضی معتبری پیدا نکردم.';
-                    }
-                    
-                    // محاسبه نتیجه
-                    const result = eval(mathExpression);
-                    return `نتیجه محاسبه ${mathExpression} = ${result}`;
-                } catch (error) {
-                    return 'نتوانستم مسئله ریاضی را حل کنم. لطفاً یک عبارت معتبر وارد کنید.';
-                }
-            }
-            
-            // پردازش سلام و احوالپرسی
-            handleGreeting() {
-                const greetings = [
-                    'سلام! چطور می‌توانم کمک کنم؟',
-                    'درود! چه کمکی از دستم برمی‌آید؟',
-                    'سلام بر شما! چه سوالی دارید؟',
-                    'سلام! خوشحالم که با شما گفتگو می‌کنم.'
-                ];
-                
-                return greetings[Math.floor(Math.random() * greetings.length)];
-            }
-            
-            // پردازش خداحافظی
-            handleFarewell() {
-                const farewells = [
-                    'خداحافظ! امیدوارم باز هم ببینمتان.',
-                    'بدرود! اگر سوالی داشتید در خدمتم.',
-                    'خدانگهدار! روز خوبی داشته باشید.',
-                    'خداحافظ! از گفتگو با شما لذت بردم.'
-                ];
-                
-                return farewells[Math.floor(Math.random() * farewells.length)];
-            }
-            
-            // پردازش سوالات عمومی
-            async handleQuestion(question, context) {
-                // در این بخش می‌توانید از APIهای خارجی یا دانش پایگاه داده استفاده کنید
-                // این یک نمونه ساده است
-                
-                const commonQuestions = {
-                    'آب و هوا': ['آب و هوا', 'هوا چطوره', 'دما'],
-                    'اخبار': ['اخبار', 'تازه‌ها', 'جدید'],
-                    'زمان': ['ساعت', 'زمان', 'چند شب']
-                };
-                
-                // پاسخ به سوالات متداول
-                for (const [category, keywords] of Object.entries(commonQuestions)) {
-                    if (keywords.some(keyword => question.includes(keyword))) {
-                        return this.answerCommonQuestion(category, question);
-                    }
-                }
-                
-                // اگر سوال خاصی شناسایی نشد، از شبکه عصبی استفاده کنید
-                return this.responseGenerator.generateResponse(question);
-            }
-            
-            answerCommonQuestion(category, question) {
-                const responses = {
-                    'آب و هوا': 'متأسفانه به اطلاعات آب و هوایی دسترسی ندارم. می‌توانید از برنامه‌های آب و هوا استفاده کنید.',
-                    'اخبار': 'برای دریافت اخبار به روز، پیشنهاد می‌کنم به سایت‌های خبری معتبر مراجعه کنید.',
-                    'زمان': `هم اکنون ساعت ${new Date().toLocaleTimeString('fa-IR')} است.`
-                };
-                
-                return responses[category] || 'متأسفانه اطلاعاتی در این زمینه ندارم.';
-            }
-            
-            // تطبیق پاسخ با حالت احساسی کاربر
-            adaptToSentiment(response, sentiment) {
-                if (sentiment === 'positive') {
-                    return response + ' 😊';
-                } else if (sentiment === 'negative') {
-                    return response + ' امیدوارم حالتان بهتر شود.';
-                }
-                return response;
-            }
+            return "متوجه منظورت نشدم. می‌تونی طور دیگه بپرسی؟";
         }
 
-        // راه‌اندازی هوش مصنوعی
-        const persianAI = new PersianAI();
-
-        // مدیریت ارسال پیام از طریق رابط کاربری
-        async function sendMessage() {
-            const userInput = document.getElementById('user-input').value;
-            if (!userInput.trim()) return;
+        // تابع پردازش پیام کاربر و تولید پاسخ
+        function processMessage() {
+            const userInput = document.getElementById('user-input').value.trim();
+            if (!userInput) return;
             
             // نمایش پیام کاربر
             displayMessage(userInput, 'user');
             document.getElementById('user-input').value = '';
             
-            // نمایش حالت در حال پردازش
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'message ai-message';
-            loadingDiv.innerHTML = '<div class="message-content"><p class="loading">در حال پردازش...</p></div>';
-            document.getElementById('chat-box').appendChild(loadingDiv);
-            document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
+            // تشخیص قصد کاربر و تولید پاسخ
+            const intent = detectIntent(userInput);
+            const response = generateResponse(intent);
             
-            try {
-                // دریافت پاسخ از هوش مصنوعی
-                const response = await persianAI.processMessage(userInput);
-                
-                // حذف حالت در حال پردازش و نمایش پاسخ
-                document.getElementById('chat-box').removeChild(loadingDiv);
+            // نمایش پاسخ با تاخیر برای طبیعی‌تر شدن
+            setTimeout(() => {
                 displayMessage(response, 'ai');
-            } catch (error) {
-                document.getElementById('chat-box').removeChild(loadingDiv);
-                displayMessage('متأسفانه در پردازش پیام شما خطایی رخ داده است.', 'ai');
-                console.error('Error:', error);
-            }
+            }, 1000);
         }
 
-        // نمایش پیام در چت
+        // تابع نمایش پیام در چت
         function displayMessage(text, sender) {
             const chatBox = document.getElementById('chat-box');
             const messageDiv = document.createElement('div');
@@ -561,7 +204,7 @@
         // امکان ارسال با کلید Enter
         document.getElementById('user-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                sendMessage();
+                processMessage();
             }
         });
     </script>
