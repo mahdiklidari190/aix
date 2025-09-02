@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>چت‌بات BK JS پیشرفته</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6c757d;
+            --background-color: #f8f9fa;
+            --user-message-bg: #e3f2fd;
+            --bot-message-bg: #f1f0f0;
+            --font-family: "Vazirmatn", "Tanha", "Segoe UI", Tahoma, sans-serif;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 0.75rem;
+            border-radius: 1rem;
+            animation: fadeIn 0.3s ease;
+            position: relative;
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            background-color: var(--user-message-bg);
+            border-bottom-right-radius: 0.25rem;
+        }
+        
+        .bot-message {
+            align-self: flex-start;
+            background-color: var(--bot-message-bg);
+            border-bottom-left-radius: 0.25rem;
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            color: var(--secondary-color);
+            margin-top: 0.25rem;
+            text-align: right;
+        }
+        
+        .input-container {
+            display: flex;
+            padding: 1rem;
+            background-color: white;
+            border-top: 1px solid #ddd;
+        }
+        
+        #userInput {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 1.5rem;
+            font-family: var(--font-family);
+            outline: none;
+        }
+        
+        #sendBtn {
+            margin-right: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 1.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        #sendBtn:hover {
+            background-color: #3a5a80;
+        }
+        
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            background-color: var(--bot-message-bg);
+            padding: 0.75rem;
+            border-radius: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .typing-dots {
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .typing-dot {
+            width: 0.5rem;
+            height: 0.5rem;
+            background-color: var(--secondary-color);
+            border-radius: 50%;
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes typingAnimation {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+
+        .settings-btn {
+            position: absolute;
+            left: 1rem;
+            top: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: white;
+        }
+
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100%;
+            background: white;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            padding: 1rem;
+            transition: left 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .settings-panel.active {
+            left: 0;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .close-settings {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .setting-item {
+            margin-bottom: 1rem;
+        }
+
+        .setting-item label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .setting-item input, .setting-item select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 0.25rem;
+            font-family: var(--font-family);
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+    </style>
+    <!-- فونت Vazirmatn برای پشتیبانی از فارسی -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+</head>
+<body>
+    <div class="header">
+        <button class="settings-btn">⚙️</button>
+        <h1>چت‌بات BK JS</h1>
+        <p>نسخه پیشرفته و حرفه‌ای</p>
+    </div>
+    
+    <div class="chat-container" id="chatContainer">
+        <div class="message bot-message">
+            سلام! من BK JS هستم، چت‌بات پیشرفته. چطور می‌تونم کمکتون کنم؟
+            <div class="message-time">همین الان</div>
+        </div>
+    </div>
+    
+    <div class="typing-indicator" id="typingIndicator">
+        <div class="typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>
+    </div>
+    
+    <div class="input-container">
+        <input type="text" id="userInput" placeholder="پیام خود را بنویسید...">
+        <button id="sendBtn">ارسال</button>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">
+            <h2>تنظیمات</h2>
+            <button class="close-settings">×</button>
+        </div>
+        
+        <div class="setting-item">
+            <label for="userName">نام شما</label>
+            <input type="text" id="userName" value="کاربر">
+        </div>
+        
+        <div class="setting-item">
+            <label for="chatMode">مود گفتگو</label>
+            <select id="chatMode">
+                <option value="normal">عادی</option>
+                <option value="funny">خنده دار 😂</option>
+                <option value="romantic">رمانتیک 💖</option>
+                <option value="serious">جدی 🧐</option>
+                <option value="pro">حرفه‌ای 🤖</option>
+                <option value="sarcastic">طنز 😏</option>
+                <option value="angry">عصبی 😡</option>
+            </select>
+        </div>
+        
+        <div class="setting-item">
+            <label for="fontSize">اندازه فونت</label>
+            <select id="fontSize">
+                <option value="small">کوچک</option>
+                <option value="medium" selected>متوسط</option>
+                <option value="large">بزرگ</option>
+            </select>
+        </div>
+        
+        <div class="setting-item">
+            <button id="clearHistoryBtn" style="width: 100%; padding: 0.75rem; background: #ff4757; color: white; border: none; border-radius: 0.25rem; cursor: pointer;">
+                پاک کردن تاریخچه گفتگو
+            </button>
+        </div>
+        
+        <div class="setting-item">
+            <button id="exportDataBtn" style="width: 100%; padding: 0.75rem; background: var(--primary-color); color: white; border: none; border-radius: 0.25rem; cursor: pointer;">
+                ذخیره گفتگو
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ====== ابر BK JS – نسخه پیشرفته و حرفه‌ای ======
+        const keywordsDB = {
+            greeting: ["سلام", "درود", "هی", "صبح بخیر", "شب بخیر", "خوش آمدی", "احوالپرسی", "چطوری", "حالت", "وقت بخیر", "سلامتی", "hello", "hi", "hey", "good morning", "good night"],
+            personal: ["چند سالته", "اسمت", "نام", "اهل کجایی", "شغل", "تحصیل", "رشته", "زبان", "خانواده", "تولد", "محل زندگی", "ملیت", "اقامت", "name", "age", "job", "study"],
+            weather: ["هوا", "باران", "برف", "آفتابی", "ابری", "دما", "گرما", "سرما", "فصل", "باد", "خورشید", "طوفان", "رطوبت", "مه", "weather", "rain", "snow", "sunny", "cloudy", "temperature"],
+            daily: ["برنامه", "کار", "روز", "امروز", "فردا", "هفته", "ماه", "سال", "روتین", "صبح", "شب", "هدف", "وظیفه", "تکلیف", "plan", "work", "day", "today", "tomorrow"],
+            fun: ["جوک", "خنده", "معما", "فان", "سرگرمی", "میم", "طنز", "سرگرم‌کننده", "joke", "fun", "riddle", "meme"],
+            tech: ["کامپیوتر", "گوشی", "موبایل", "اینترنت", "AI", "هوش مصنوعی", "بازی", "ربات", "تکنولوژی", "اپلیکیشن", "نرم افزار", "computer", "phone", "internet", "ai", "technology", "app"],
+            emotions: ["خوشحالم", "غمگینم", "عصبانیم", "خستم", "استرس دارم", "شادم", "ناراحتم", "شگفت زده", "هیجان زده", "کلافه", "happy", "sad", "angry", "tired", "stressed", "excited"],
+            learning: ["یاد بگیر", "آموزش بده", "چطوری", "یادم بده", "چگونه", "طریقه", "روش", "teach", "learn", "how to", "way to"]
+        };
+
+        const templatesDB = {
+            greeting: ["سلام {name}، حالت چطوره؟", "درود، امروز چطوری؟", "هی {name}، خوبی؟", "سلام رفیق، چه خبر؟"],
+            personal: ["من هوش مصنوعی BK هستم، تو چی؟", "اسم من BK هست، تو چی؟", "دوست دارم بیشتر درباره تو بدونم!"],
+            weather: ["امروز هوا {adj}ه، دوست داری بریم بیرون؟", "چه هوای {adj}ای! برنامه داری؟", "هوا امروز {adj}ه، حس و حالت چطوره؟"],
+            daily: ["چه برنامه‌ای برای {time} داری؟", "امروز چیکار کردی؟", "فردا چه کاری داری؟", "برنامه‌ات برای {time} چیه؟"],
+            fun: ["می‌خوای یه جوک برات تعریف کنم؟", "یه معما داری میخوای حلش کنی؟", "خنده برای سلامتیه 😄", "میخوای یه سرگرمی انجام بدیم؟"],
+            tech: ["امروز در دنیای تکنولوژی چه خبر؟", "میخوای درباره AI حرف بزنیم؟", "ربات‌ها روز به روز هوشمندتر میشن", "میخوای یه نکته تکنولوژی برات بگم؟"],
+            emotions: ["میبینم امروز {emo} هستی، میخوای راجع بهش حرف بزنیم؟", "حالت {emo}ه، دوست داری یه چیز خوشحال‌کننده برات تعریف کنم؟", "احساس {emo} داری؟ بیا کمی صحبت کنیم!"],
+            learning: ["دوست داری در مورد {topic} چیزی یاد بگیریم؟", "می‌خوای برات درباره {topic} توضیح بدم؟", "یادگیری {topic} میتونه جالب باشه!"]
+        };
+
+        const adjectives = ["قشنگ", "خوب", "عالی", "فوقالعاده", "لطیف", "خنک", "گرم", "مرطوب", "شرجی", "تازه"];
+        const times = ["امروز", "فردا", "این هفته", "این ماه", "آخر هفته", "تعطیلات", "آینده"];
+        const emotions = ["خوشحال", "غمگین", "عصبی", "خسته", "شاد", "ناراحت", "شگفت‌زده", "هیجان زده", "کلافه"];
+        const modes = { normal: "", funny: "😂", romantic: "💖", serious: "🧐", pro: "🤖", sarcastic: "😏", angry: "😡" };
+
+        let userData = { 
+            name: "کاربر", 
+            mode: "normal", 
+            history: [], 
+            lastTopics: [], 
+            lastResponses: [], 
+            interests: [],
+            learnedResponses: {} // پاسخ‌های یادگرفته شده جدید
+        };
+
+        // بارگذاری داده‌ها از localStorage اگر وجود داشته باشه
+        if (localStorage.getItem('userData')) {
+            try {
+                const savedData = JSON.parse(localStorage.getItem('userData'));
+                userData = { ...userData, ...savedData };
+                
+                // بارگذاری نام کاربر در تنظیمات
+                document.getElementById('userName').value = userData.name;
+                document.getElementById('chatMode').value = userData.mode;
+            } catch (e) {
+                console.error("خطا در بارگذاری داده‌های ذخیره شده:", e);
+            }
+        }
+
+        // ====== تولید پاسخ پیشرفته ======
+        function generateResponse(msg) {
+            const message = msg.toLowerCase().trim();
+            userData.history.push({
+                text: message,
+                time: new Date().toLocaleTimeString('fa-IR')
+            });
+            
+            if (userData.history.length > 100) userData.history.shift(); // محدود کردن تاریخچه
+
+            // بررسی پاسخ‌های یادگرفته شده
+            for (const learnedQuestion in userData.learnedResponses) {
+                if (message.includes(learnedQuestion.toLowerCase())) {
+                    return userData.learnedResponses[learnedQuestion];
+                }
+            }
+
+            // تشخیص نام کاربر (مثل "اسمم علی هست")
+            const nameMatch = message.match(/(اسمم|نامم|من\s*)(.+?)(هستم|است|ه|هس|میگن|هست)/i);
+            if (nameMatch && nameMatch[2]) {
+                setUserName(nameMatch[2].trim());
+            }
+
+            // تشخیص تغییر مود (مثل "مود funny" یا "mode sarcastic")
+            const modeMatch = message.match(/(مود|mode)\s*(\w+)/i);
+            if (modeMatch && modeMatch[2]) {
+                setUserMode(modeMatch[2].toLowerCase());
+            }
+
+            // تشخیص علاقه‌ها (مثل "علاقه‌ام به تکنولوژی")
+            const interestMatch = message.match(/(علاقه|دوست دارم|هابی|سرگرمی)\s*(به|در|با)?\s*(.+)/i);
+            if (interestMatch && interestMatch[3]) {
+                addInterest(interestMatch[3].trim());
+            }
+
+            // سیستم یادگیری (مثل "یاد بگیر وقتی میگم سلام جواب بده درود")
+            const learnMatch = message.match(/(یاد بگیر|آموزش بده) وقتی میگم (.+?) جواب بده (.+)/i);
+            if (learnMatch && learnMatch[2] && learnMatch[3]) {
+                userData.learnedResponses[learnMatch[2].trim()] = learnMatch[3].trim();
+                localStorage.setItem('userData', JSON.stringify(userData));
+                return `چشم! یاد گرفتم وقتی میگی "${learnMatch[2].trim()}" جواب بدم "${learnMatch[3].trim()}"`;
+            }
+
+            // معرفی ربات
+            const selfKeywords = ["تو چی هستی", "تو چه مدلی", "هوش مصنوعی تو", "چی هستی", "مدل هوش مصنوعی", "who are you", "what are you"];
+            if (selfKeywords.some(k => message.includes(k.toLowerCase()))) return randomChoice([
+                "من هوش مصنوعی BK هستم 🤖، یک ربات حرفه‌ای برای چت و کمک!",
+                "اسم من BK هست، یک AI پیشرفته 😎",
+                "من هوش مصنوعی BK هستم، خوشبختم! می‌تونم در مورد {interest} حرف بزنیم؟".replace("{interest}", userData.interests.length > 0 ? randomChoice(userData.interests) : "هر چیزی")
+            ]);
+
+            // پاسخ به بی‌احترامی و +18 (فیلترینگ گسترده‌تر با regex)
+            const rudeRegex = /(بی ادب|حرامزاده|لعنتی|سکس|جنسی|\+18|fuck|shit|sex|idiot|stupid|f\*\*k|sh\*\*|کوس|کوس ننت|کوس کش|مادر خراب|کادر جنده|جنده|کوس نگو|کونی|گی|مادرت رو گایدم|کوس صورتی|فاکیو|ننت رو گایدم|ننه جنده|ننه خراب)/i;
+            if (rudeRegex.test(message)) return randomChoice([
+                "لطفا ادب رو رعایت کنید 😔",
+                "این نوع صحبت کردن مناسب نیست 🙁",
+                "بیایید با احترام با هم گفتگو کنیم 🤝"
+            ]);
+
+            // شناسایی دسته‌ها با بهبود (استفاده از regex برای دقت بیشتر)
+            const matched = [];
+            for (const cat in keywordsDB) {
+                if (keywordsDB[cat].some(k => new RegExp(k, 'i').test(message))) matched.push(cat);
+            }
+            
+            if (matched.length === 0) {
+                // اگر سوال بود اما پاسخ داده نشد، پیشنهاد یادگیری بده
+                if (message.includes('؟') || message.includes('?')) {
+                    return "متوجه سوالت نشدم. می‌خوای یادم بدی چطور به این سوال جواب بدم؟ (بنویس: یاد بگیر وقتی میگم \"سوال تو\" جواب بده \"پاسخ مناسب\")";
+                }
+                
+                return randomChoice([
+                    "جالب است! بیشتر برام تعریف کن.",
+                    "چه خوب! دوست داری بیشتر صحبت کنیم؟",
+                    "منظورت رو متوجه نشدم، میشه توضیح بدی؟",
+                    "دوست داری یه موضوع جدید شروع کنیم؟ شاید در مورد {interest}؟".replace("{interest}", userData.interests.length > 0 ? randomChoice(userData.interests) : "هر چیزی")
+                ]);
+            }
+
+            // ترکیب پاسخ چند دسته‌ای (1 تا 3 دسته) با بهبود خوانایی
+            const selected = randomItems(matched, Math.min(matched.length, 3));
+            let response = selected.map(cat => {
+                let tpl = randomChoice(templatesDB[cat]);
+                // بهبود {emo}: سعی در تشخیص احساس واقعی
+                let emo = randomChoice(emotions);
+                for (const e of emotions) {
+                    if (message.includes(e)) {
+                        emo = e;
+                        break;
+                    }
+                }
+                
+                // استخراج موضوع از پیام برای بخش یادگیری
+                let topic = extractTopic(message, cat);
+                
+                tpl = tpl.replace(/{name}/g, userData.name)
+                    .replace(/{adj}/g, randomChoice(adjectives))
+                    .replace(/{time}/g, randomChoice(times))
+                    .replace(/{emo}/g, emo)
+                    .replace(/{topic}/g, topic);
+                return tpl;
+            }).join("\n"); // جوین با خط جدید برای خوانایی بهتر
+
+            // اضافه کردن علاقه‌ها به پاسخ اگر مرتبط
+            if (userData.interests.length > 0 && Math.random() > 0.7) {
+                response += `\nراستی، دیدم به ${randomChoice(userData.interests)} علاقه داری، می‌خوای بیشتر حرف بزنیم؟`;
+            }
+
+            // مود
+            if (modes[userData.mode]) response += " " + modes[userData.mode];
+
+            // حافظه کوتاه
+            userData.lastTopics = [...selected];
+            userData.lastResponses.push(response);
+            if (userData.lastResponses.length > 50) userData.lastResponses.shift();
+
+            // ذخیره در localStorage
+            localStorage.setItem('userData', JSON.stringify(userData));
+
+            return response;
+        }
+
+        // ====== کمکی ======
+        function randomChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        
+        function randomItems(arr, n) {
+            // بهبود randomness با Fisher-Yates shuffle
+            const shuffled = [...arr];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled.slice(0, n);
+        }
+        
+        function setUserName(name) { 
+            userData.name = name || "کاربر"; 
+            document.getElementById('userName').value = userData.name;
+            localStorage.setItem('userData', JSON.stringify(userData));
+        }
+        
+        function setUserMode(mode) { 
+            if (modes[mode]) {
+                userData.mode = mode; 
+                document.getElementById('chatMode').value = userData.mode;
+                localStorage.setItem('userData', JSON.stringify(userData));
+            }
+        }
+        
+        function addInterest(interest) { 
+            if (!userData.interests.includes(interest)) {
+                userData.interests.push(interest); 
+                localStorage.setItem('userData', JSON.stringify(userData));
+            }
+        }
+        
+        function getLastTopics() { return userData.lastTopics; }
+        function getLastResponses() { return userData.lastResponses; }
+        
+        // استخراج موضوع از پیام
+        function extractTopic(message, category) {
+            // این تابع سعی می‌کند موضوع اصلی پیام را استخراج کند
+            const words = message.split(' ');
+            if (words.length > 2) {
+                // برای سوالات "چطور" و "چگونه"
+                if (message.includes('چطور') || message.includes('چگونه') || message.includes('how')) {
+                    return words.slice(words.findIndex(w => w === 'چطور' || w === 'چگونه' || w === 'how') + 1).join(' ');
+                }
+                
+                // برای سایر موارد، کلمات کلیدی را برمی‌گرداند
+                return words.slice(-2).join(' ');
+            }
+            return category;
+        }
+
+        // ====== رابط کاربری JS ======
+        const inputField = document.getElementById("userInput");
+        const sendBtn = document.getElementById("sendBtn");
+        const chatContainer = document.getElementById("chatContainer");
+        const typingIndicator = document.getElementById("typingIndicator");
+        const settingsBtn = document.querySelector(".settings-btn");
+        const settingsPanel = document.getElementById("settingsPanel");
+        const overlay = document.getElementById("overlay");
+        const closeSettings = document.querySelector(".close-settings");
+        const userNameInput = document.getElementById("userName");
+        const chatModeSelect = document.getElementById("chatMode");
+        const fontSizeSelect = document.getElementById("fontSize");
+        const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+        const exportDataBtn = document.getElementById("exportDataBtn");
+
+        function addMessage(msg, type) {
+            const el = document.createElement("div");
+            el.classList.add("message", type === "user" ? "user-message" : "bot-message");
+            
+            const messageText = document.createElement("div");
+            messageText.textContent = msg;
+            el.appendChild(messageText);
+            
+            const messageTime = document.createElement("div");
+            messageTime.classList.add("message-time");
+            messageTime.textContent = new Date().toLocaleTimeString('fa-IR');
+            el.appendChild(messageTime);
+            
+            chatContainer.appendChild(el);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            typingIndicator.style.display = 'block';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            typingIndicator.style.display = 'none';
+        }
+
+        function sendMessage() {
+            const msg = inputField.value.trim();
+            if (msg === "") return;
+            
+            addMessage(msg, "user");
+            inputField.value = "";
+            
+            showTypingIndicator();
+            
+            setTimeout(() => {
+                hideTypingIndicator();
+                addMessage(generateResponse(msg), "bot");
+            }, 1000 + Math.random() * 1000); // تایپ کردن تصادفی بین 1-2 ثانیه
+        }
+
+        // مدیریت تنظیمات
+        settingsBtn.addEventListener('click', () => {
+            settingsPanel.classList.add('active');
+            overlay.classList.add('active');
+        });
+
+        closeSettings.addEventListener('click', () => {
+            settingsPanel.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+
+        overlay.addEventListener('click', () => {
+            settingsPanel.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+
+        userNameInput.addEventListener('change', (e) => {
+            setUserName(e.target.value);
+        });
+
+        chatModeSelect.addEventListener('change', (e) => {
+            setUserMode(e.target.value);
+        });
+
+        fontSizeSelect.addEventListener('change', (e) => {
+            document.documentElement.style.fontSize = 
+                e.target.value === 'small' ? '14px' : 
+                e.target.value === 'medium' ? '16px' : '18px';
+        });
+
+        clearHistoryBtn.addEventListener('click', () => {
+            if (confirm('آیا از پاک کردن تاریخچه گفتگو مطمئن هستید؟')) {
+                userData.history = [];
+                userData.lastResponses = [];
+                userData.lastTopics = [];
+                localStorage.setItem('userData', JSON.stringify(userData));
+                
+                // پاک کردن پیام‌های نمایش داده شده (به جز اولین پیام ربات)
+                const messages = chatContainer.querySelectorAll('.message');
+                for (let i = messages.length - 1; i > 0; i--) {
+                    chatContainer.removeChild(messages[i]);
+                }
+                
+                alert('تاریخچه گفتگو پاک شد.');
+            }
+        });
+
+        exportDataBtn.addEventListener('click', () => {
+            const dataStr = JSON.stringify(userData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `bk-chat-data-${new Date().toLocaleDateString('fa-IR')}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        });
+
+        sendBtn.addEventListener("click", sendMessage);
+        inputField.addEventListener("keypress", e => { if (e.key === "Enter") sendMessage(); });
+
+        // بارگذاری تاریخچه گفتگو در ابتدا
+        window.addEventListener('load', () => {
+            if (userData.history.length > 0) {
+                // فقط آخرین 10 پیام را نمایش بده
+                const recentHistory = userData.history.slice(-10);
+                
+                recentHistory.forEach(item => {
+                    addMessage(item.text, "user");
+                    // برای سادگی، پاسخ ربات را نشان نمی‌دهیم
+                    // در واقعیت باید پاسخ‌های ذخیره شده را هم داشته باشیم
+                });
+            }
+        });
+    </script>
+</body>
+</html>
