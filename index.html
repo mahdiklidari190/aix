@@ -3,144 +3,629 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>هوش مصنوعی چت فارسی</title>
+    <title>هوش مصنوعی چت فارسی پیشرفته</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        :root {
+            --primary-color: #4a6bdf;
+            --secondary-color: #6c42f5;
+            --accent-color: #ff6b6b;
+            --light-bg: #f8f9fa;
+            --dark-text: #2d3748;
+            --light-text: #718096;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark-text);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
-            min-height: 100vh;
+            align-items: center;
+            padding: 20px;
         }
+
         .container {
             width: 100%;
-            max-width: 800px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            max-width: 1000px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
         }
+
         header {
-            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+            background: var(--gradient);
             color: white;
             padding: 20px;
             text-align: center;
+            position: relative;
         }
-        .chat-container {
-            height: 400px;
-            overflow-y: auto;
-            padding: 15px;
-            background: #f9f9f9;
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
         }
-        .message {
-            margin-bottom: 15px;
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .badges {
             display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
         }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: var(--light-bg);
+            padding: 20px;
+            border-left: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            background: #e9ecef;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 15px 20px;
+            background: white;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .ai-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4ade80;
+        }
+
+        .chat-actions button {
+            background: transparent;
+            border: none;
+            color: var(--light-text);
+            cursor: pointer;
+            font-size: 1rem;
+            margin-left: 10px;
+        }
+
+        .chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--light-bg);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            display: flex;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .user-message {
-            justify-content: flex-end;
+            align-self: flex-end;
+            flex-direction: row-reverse;
         }
+
         .ai-message {
-            justify-content: flex-start;
+            align-self: flex-start;
         }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 10px;
+            flex-shrink: 0;
+        }
+
+        .user-message .avatar {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .ai-message .avatar {
+            background: var(--primary-color);
+            color: white;
+        }
+
         .message-content {
-            max-width: 70%;
-            padding: 10px 15px;
+            background: var(--card-bg);
+            padding: 12px 16px;
             border-radius: 18px;
+            box-shadow: var(--shadow);
         }
+
         .user-message .message-content {
-            background: #dcf8c6;
+            background: #e3f2fd;
             border-top-right-radius: 5px;
         }
+
         .ai-message .message-content {
             background: white;
             border-top-left-radius: 5px;
-            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
         }
+
+        .message-text {
+            margin-bottom: 5px;
+            line-height: 1.5;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: var(--light-text);
+            text-align: left;
+        }
+
+        .user-message .message-time {
+            text-align: right;
+        }
+
         .input-area {
             padding: 15px;
             background: white;
             border-top: 1px solid #eee;
+        }
+
+        .input-container {
             display: flex;
+            margin-bottom: 10px;
         }
-        input {
+
+        #user-input {
             flex: 1;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
             outline: none;
+            font-size: 1rem;
+            transition: border-color 0.3s;
         }
-        button {
-            background: #4b6cb7;
+
+        #user-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        #send-btn {
+            background: var(--primary-color);
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 20px;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
             margin-right: 10px;
             cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        #send-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        .quick-actions {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .quick-btn {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.8rem;
+        }
+
+        .quick-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 10px 15px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            align-self: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--light-text);
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingAnimation {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+
+        /* ریسپانسیو برای موبایل */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid #eee;
+                max-height: 150px;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            header h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* اسکرول بار سفارشی */
+        .chat-box::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-box::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 10px;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>هوش مصنوعی چت فارسی</h1>
-            <p>یک سیستم گفتگوی هوشمند مبتنی بر JavaScript</p>
+            <h1>هوش مصنوعی چت فارسی پیشرفته</h1>
+            <p>یک دستیار هوشمند با قابلیت گفتگو، حل مسائل و جستجوی اطلاعات</p>
+            <div class="badges">
+                <span class="badge">هوش مصنوعی</span>
+                <span class="badge">پشتیبانی فارسی</span>
+                <span class="badge">پاسخ هوشمند</span>
+            </div>
         </header>
-        
-        <div class="chat-container" id="chat-box">
-            <div class="message ai-message">
-                <div class="message-content">
-                    <p>سلام! من یک هوش مصنوعی فارسی هستم. چگونه می‌توانم به شما کمک کنم؟</p>
+
+        <div class="main-content">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="ai-status">
+                        <div class="status-dot"></div>
+                        <span>هوش مصنوعی آنلاین</span>
+                    </div>
+                    <div class="chat-actions">
+                        <button title="پاک کردن چت" onclick="clearChat()">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <button title="تنظیمات" onclick="showSettings()">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="chat-box" id="chat-box">
+                    <div class="message ai-message">
+                        <div class="avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-text">سلام! من یک هوش مصنوعی فارسی هستم. چگونه می‌توانم به شما کمک کنم؟</div>
+                            <div class="message-time">همین حالا</div>
+                        </div>
+                    </div>
+                    
+                    <div class="typing-indicator" id="typing-indicator">
+                        <div class="typing-dots">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <div class="input-container">
+                        <input type="text" id="user-input" placeholder="پیام خود را وارد کنید..." autocomplete="off">
+                        <button id="send-btn" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="quick-btn" onclick="suggestQuestion('پیشنهاد مقاله')">پیشنهاد مقاله</button>
+                        <button class="quick-btn" onclick="suggestQuestion('اخبار روز')">اخبار روز</button>
+                        <button class="quick-btn" onclick="suggestQuestion('طرفد امروز')">طرفد امروز</button>
+                        <button class="quick-btn" onclick="suggestQuestion('جوک بگو')">جوک بگو</button>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="پیام خود را وارد کنید..." autocomplete="off">
-            <button onclick="processMessage()">ارسال</button>
+
+            <div class="sidebar">
+                <h3>تاریخچه گفتگو</h3>
+                <div class="history-list" id="history-list">
+                    <!-- تاریخچه گفتگوها اینجا نمایش داده می شود -->
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // پایگاه داده دانش هوش مصنوعی
+        // پایگاه داده دانش گسترده
         const knowledgeBase = {
             greetings: {
-                patterns: ["سلام", "درود", "سلامتی", "علیک", "hello", "hi"],
+                patterns: ["سلام", "درود", "سلامتی", "علیک", "hello", "hi", "صبح بخیر", "عصر بخیر", "شب بخیر"],
                 responses: [
-                    "سلام! چطور می‌تونم کمک تون کنم؟",
-                    "درود! خوشحالم که باهات گفتگو می‌کنم.",
-                    "سلام بر شما! چه سوالی دارید؟"
+                    "سلام! چطور می‌تونم کمک تون کنم؟ 😊",
+                    "درود بر شما! چه کمکی از دستم برمیاد؟",
+                    "سلام! خوشحالم که باهات گفتگو می‌کنم. امروز چه سوالی داری؟"
                 ]
             },
             farewells: {
-                patterns: ["خداحافظ", "بای", "خدانگهدار", "goodbye", "bye"],
+                patterns: ["خداحافظ", "بای", "خدانگهدار", "goodbye", "bye", "فعلا", "بدرود"],
                 responses: [
-                    "خداحافظ! امیدوارم باز هم ببینمت.",
+                    "خداحافظ! امیدوارم باز هم ببینمت. 🌸",
                     "بدرود! همیشه در خدمت شما هستم.",
-                    "خدانگهدار! روز خوبی داشته باشید."
+                    "خدانگهدار! روز خوبی داشته باشید. ☀️"
                 ]
             },
-            questions: {
-                patterns: ["چطور", "چگونه", "چرا", "کی", "کجا", "چه", "چقد"],
+            thanks: {
+                patterns: ["ممنون", "متشکرم", "مرسی", "thanks", "thank you", "دست مریزاد"],
                 responses: [
-                    "این سوال خوبیه! می‌تونم کمکت کنم.",
-                    "اجازه بده در مورد این موضوع فکر کنم.",
-                    "منظورت رو متوجه شدم. بذار جواب مناسبی برات پیدا کنم."
+                    "خواهش می‌کنم! خوشحالم که تونستم کمک کنم. 😊",
+                    "قابل نداشت! همیشه خوشحال می‌شم کمکت کنم.",
+                    "خواهش می‌کنم! برای من افتخاره که می‌تونم کمکتون کنم."
                 ]
             },
             math: {
-                patterns: ["محاسبه", "ریاضی", "جمع", "تفریق", "ضرب", "تقسیم", "بعلاوه", "منهای"],
+                patterns: ["محاسبه", "ریاضی", "جمع", "تفریق", "ضرب", "تقسیم", "بعلاوه", "منهای", "مسئله ریاضی", "حل کن"],
                 responses: [
-                    "من در حل مسائل ریاضی می‌تونم کمکت کنم.",
-                    "بیا این مسئله ریاضی رو با هم حل کنیم.",
-                    "ریاضیات یکی از نقاط قوت منه!"
+                    "من در حل مسائل ریاضی می‌تونم کمکت کنم. بگو چه مسئله‌ای داری?",
+                    "بیا این مسئله ریاضی رو با هم حل کنیم. مشکلت چیه?",
+                    "ریاضیات یکی از نقاط قوت منه! بپرسم چه سوالی داری?"
+                ]
+            },
+            weather: {
+                patterns: ["هوا", "آب و هوا", "دما", "درجه", "هواشناسی", "باران", "آفتابی"],
+                responses: [
+                    "برای اطلاعات آب و هوا، می‌تونم کمک کنم. نام شهرت رو بگو.",
+                    "دوست داری بدونین امروز هوا چطوره؟ اسم شهر رو بهم بگو.",
+                    "برای دریافت اطلاعات آب و هوا، لطفا نام شهر خود را وارد کنید."
+                ]
+            },
+            news: {
+                patterns: ["اخبار", "خبر", "تازه", "جدید", "news", "تازه‌ها", "اخبار روز"],
+                responses: [
+                    "می‌تونم آخرین اخبار رو برات پیدا کنم. به چه موضوعی علاقه داری?",
+                    "اخبار زیادی امروز منتشر شده. دوست داری در مورد چه موضوعی بخونی?",
+                    "برای دریافت اخبار به روز، لطفا موضوع مورد نظر خود را مشخص کنید."
+                ]
+            },
+            time: {
+                patterns: ["ساعت", "زمان", "چند شب", "چند صبح", "امروز چندمه", "تاریخ"],
+                responses: [
+                    `هم اکنون ساعت ${new Date().toLocaleTimeString('fa-IR')} است.`,
+                    `امروز ${new Date().toLocaleDateString('fa-IR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} است.`,
+                    `الان ${new Date().toLocaleTimeString('fa-IR')} و تاریخ امروز ${new Date().toLocaleDateString('fa-IR')} است.`
+                ]
+            },
+            jokes: {
+                patterns: ["جوک", "طنز", "خنده", "خندیدن", "خنده دار", "joke", "فکاهی"],
+                responses: [
+                    "چرا کتاب ریاضی غمگین بود؟ چون مشکلات زیادی داشت! 😄",
+                    "چه فرقی بین یک دندانپزشک و یک معلم هست؟ دندانپزشک فقط یک کلاس داره! 🤣",
+                    "چرا کامپیوتر بیمار شد؟ چون ویروس گرفته بود! 🤭"
                 ]
             }
         };
 
-        // تابع تشخیص الگو در پیام کاربر
+        // API های رایگان (بدون نیاز به ثبت نام)
+        const freeAPIs = {
+            advice: "https://api.adviceslip.com/advice",
+            quotes: "https://api.quotable.io/random",
+            numbers: "http://numbersapi.com/random/trivia?json",
+            jokes: "https://official-joke-api.appspot.com/random_joke"
+        };
+
+        // ذخیره‌سازی تاریخچه گفتگو
+        let chatHistory = JSON.parse(localStorage.getItem('persianAI_chatHistory')) || [];
+        let currentSession = [];
+
+        // نمایش تاریخچه گفتگو
+        function renderChatHistory() {
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML = '';
+            
+            currentSession.forEach(msg => {
+                displayMessage(msg.text, msg.sender, msg.time, false);
+            });
+            
+            // اسکرول به پایین
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // ذخیره تاریخچه در localStorage
+        function saveToHistory(message, sender) {
+            const messageData = {
+                text: message,
+                sender: sender,
+                time: new Date().toLocaleTimeString('fa-IR')
+            };
+            
+            currentSession.push(messageData);
+            
+            // فقط ۱۰ تا از آخرین گفتگوها را نگه دار
+            if (chatHistory.length >= 10) {
+                chatHistory.shift();
+            }
+            
+            chatHistory.push({
+                session: currentSession,
+                date: new Date().toLocaleDateString('fa-IR')
+            });
+            
+            localStorage.setItem('persianAI_chatHistory', JSON.stringify(chatHistory));
+            renderHistoryList();
+        }
+
+        // نمایش لیست تاریخچه
+        function renderHistoryList() {
+            const historyList = document.getElementById('history-list');
+            historyList.innerHTML = '';
+            
+            chatHistory.forEach((session, index) => {
+                const firstMessage = session.session[0]?.text || 'گفتگو جدید';
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.innerHTML = `
+                    <div>${firstMessage.substring(0, 30)}${firstMessage.length > 30 ? '...' : ''}</div>
+                    <small>${session.date}</small>
+                `;
+                historyItem.addEventListener('click', () => loadHistorySession(index));
+                historyList.appendChild(historyItem);
+            });
+        }
+
+        // بارگذاری یک session از تاریخچه
+        function loadHistorySession(index) {
+            currentSession = chatHistory[index].session;
+            renderChatHistory();
+        }
+
+        // پاک کردن گفتگو
+        function clearChat() {
+            if (confirm('آیا از پاک کردن تاریخچه گفتگو مطمئن هستید؟')) {
+                currentSession = [];
+                renderChatHistory();
+                
+                // نمایش پیام خوشامدگویی
+                setTimeout(() => {
+                    displayMessage('سلام! مجدداً خوش آمدید. چگونه می‌توانم کمک کنم؟', 'ai');
+                }, 500);
+            }
+        }
+
+        // نمایش تنظیمات
+        function showSettings() {
+            alert('این بخش در حال توسعه است. در نسخه‌های آینده قابلیت‌های بیشتری اضافه خواهد شد.');
+        }
+
+        // پیشنهاد سوال
+        function suggestQuestion(type) {
+            const questions = {
+                'پیشنهاد مقاله': 'مقاله‌ای در مورد هوش مصنوعی پیشنهاد می‌کنی؟',
+                'اخبار روز': 'اخبار امروز در مورد تکنولوژی چیست؟',
+                'طرفد امروز': 'طرفد امروز چیست؟',
+                'جوک بگو': 'یک جوک بگو'
+            };
+            
+            document.getElementById('user-input').value = questions[type];
+        }
+
+        // تشخیص قصد کاربر
         function detectIntent(message) {
             const lowerMessage = message.toLowerCase();
             
@@ -155,58 +640,164 @@
             return "unknown";
         }
 
-        // تابع تولید پاسخ بر اساس قصد کاربر
-        function generateResponse(intent) {
+        // تولید پاسخ بر اساس قصد کاربر
+        function generateResponse(intent, userMessage) {
             if (knowledgeBase[intent]) {
                 const responses = knowledgeBase[intent].responses;
                 return responses[Math.floor(Math.random() * responses.length)];
             }
             
-            return "متوجه منظورت نشدم. می‌تونی طور دیگه بپرسی؟";
+            // اگر قصد کاربر تشخیص داده نشد، از APIهای رایگان استفاده کنید
+            return generateAPIResponse(userMessage);
         }
 
-        // تابع پردازش پیام کاربر و تولید پاسخ
-        function processMessage() {
-            const userInput = document.getElementById('user-input').value.trim();
-            if (!userInput) return;
-            
-            // نمایش پیام کاربر
-            displayMessage(userInput, 'user');
-            document.getElementById('user-input').value = '';
-            
-            // تشخیص قصد کاربر و تولید پاسخ
-            const intent = detectIntent(userInput);
-            const response = generateResponse(intent);
-            
-            // نمایش پاسخ با تاخیر برای طبیعی‌تر شدن
-            setTimeout(() => {
-                displayMessage(response, 'ai');
-            }, 1000);
+        // تولید پاسخ با استفاده از APIهای رایگان
+        async function generateAPIResponse(userMessage) {
+            try {
+                // اگر کاربر سوال پرسیده باشد
+                if (userMessage.includes('؟') || userMessage.includes('چرا') || userMessage.includes('چطور')) {
+                    const response = await fetch(freeAPIs.advice);
+                    const data = await response.json();
+                    return data.slip.advice + " 💡";
+                }
+                
+                // اگر کاربر درخواست نقل قول دارد
+                if (userMessage.includes('نقل قول') || userMessage.includes('جمله')) {
+                    const response = await fetch(freeAPIs.quotes);
+                    const data = await response.json();
+                    return `"${data.content}" - ${data.author} ✨`;
+                }
+                
+                // اگر کاربر درخواست جوک دارد
+                if (userMessage.includes('جوک') || userMessage.includes('خنده')) {
+                    const response = await fetch(freeAPIs.jokes);
+                    const data = await response.json();
+                    return `${data.setup} ... ${data.punchline} 😄`;
+                }
+                
+                // پاسخ پیش فرض
+                const responses = [
+                    "جالب است! در این مورد بیشتر بگویید.",
+                    "منظورتان را متوجه نشدم. می‌توانید clearer توضیح دهید؟",
+                    "در این مورد اطلاعاتی دارم، اما شاید بتوانم با جستجو اطلاعات بیشتری پیدا کنم.",
+                    "متأسفم، هنوز در حال یادگیری هستم و ممکن است نتوانم به همه سوالات پاسخ دهم."
+                ];
+                
+                return responses[Math.floor(Math.random() * responses.length)];
+            } catch (error) {
+                console.error('Error calling API:', error);
+                return "متوجه منظورت نشدم. می‌تونی طور دیگه بپرسی؟";
+            }
         }
 
-        // تابع نمایش پیام در چت
-        function displayMessage(text, sender) {
+        // نمایش پیام در چت
+        function displayMessage(text, sender, time = null, save = true) {
             const chatBox = document.getElementById('chat-box');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}-message`;
             
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            
+            const avatarIcon = document.createElement('i');
+            avatarIcon.className = sender === 'user' ? 'fas fa-user' : 'fas fa-robot';
+            avatar.appendChild(avatarIcon);
+            
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
-            messageContent.innerHTML = `<p>${text}</p>`;
             
+            const messageText = document.createElement('div');
+            messageText.className = 'message-text';
+            messageText.textContent = text;
+            
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            messageTime.textContent = time || new Date().toLocaleTimeString('fa-IR');
+            
+            messageContent.appendChild(messageText);
+            messageContent.appendChild(messageTime);
+            
+            messageDiv.appendChild(avatar);
             messageDiv.appendChild(messageContent);
+            
             chatBox.appendChild(messageDiv);
             
             // اسکرول به پایین
             chatBox.scrollTop = chatBox.scrollHeight;
+            
+            // ذخیره در تاریخچه
+            if (save) {
+                saveToHistory(text, sender);
+            }
+        }
+
+        // نمایش نشانگر تایپ
+        function showTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            typingIndicator.style.display = 'block';
+            document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
+        }
+
+        // پنهان کردن نشانگر تایپ
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            typingIndicator.style.display = 'none';
+        }
+
+        // پردازش پیام کاربر و تولید پاسخ
+        async function sendMessage() {
+            const userInput = document.getElementById('user-input');
+            const message = userInput.value.trim();
+            
+            if (!message) return;
+            
+            // نمایش پیام کاربر
+            displayMessage(message, 'user');
+            userInput.value = '';
+            
+            // غیرفعال کردن ورودی تا دریافت پاسخ
+            userInput.disabled = true;
+            document.getElementById('send-btn').disabled = true;
+            
+            // نمایش نشانگر تایپ
+            showTypingIndicator();
+            
+            // تاخیر برای طبیعی‌تر شدن
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            try {
+                // تشخیص قصد کاربر و تولید پاسخ
+                const intent = detectIntent(message);
+                const response = await generateResponse(intent, message);
+                
+                // پنهان کردن نشانگر تایپ و نمایش پاسخ
+                hideTypingIndicator();
+                displayMessage(response, 'ai');
+                
+            } catch (error) {
+                hideTypingIndicator();
+                displayMessage('متأسفانه در پردازش پیام شما خطایی رخ داده است.', 'ai');
+                console.error('Error:', error);
+            } finally {
+                // فعال کردن مجدد ورودی
+                userInput.disabled = false;
+                document.getElementById('send-btn').disabled = false;
+                userInput.focus();
+            }
         }
 
         // امکان ارسال با کلید Enter
         document.getElementById('user-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                processMessage();
+                sendMessage();
             }
         });
+
+        // مقداردهی اولیه
+        window.onload = function() {
+            renderHistoryList();
+            document.getElementById('user-input').focus();
+        };
     </script>
 </body>
 </html>
