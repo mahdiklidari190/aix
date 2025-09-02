@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>چت‌بات هوشمند BK AI</title>
+    <title>چت‌بات هوشمند BK AI+</title>
     <style>
         :root {
             --primary-color: #4a6fa5;
@@ -11,6 +11,7 @@
             --background-color: #f8f9fa;
             --user-message-bg: #e3f2fd;
             --bot-message-bg: #f1f0f0;
+            --math-message-bg: #e8f5e9;
             --font-family: "Vazirmatn", "Tanha", "Segoe UI", Tahoma, sans-serif;
             --text-color: #333;
             --border-color: #ddd;
@@ -22,6 +23,7 @@
             --background-color: #1a1a1a;
             --user-message-bg: #2a4b7c;
             --bot-message-bg: #3a3a3a;
+            --math-message-bg: #2d4a2d;
             --text-color: #f0f0f0;
             --border-color: #444;
         }
@@ -67,6 +69,7 @@
             animation: fadeIn 0.3s ease;
             position: relative;
             border: 1px solid var(--border-color);
+            line-height: 1.6;
         }
         
         .user-message {
@@ -79,6 +82,13 @@
             align-self: flex-start;
             background-color: var(--bot-message-bg);
             border-bottom-left-radius: 0.25rem;
+        }
+        
+        .math-message {
+            align-self: flex-start;
+            background-color: var(--math-message-bg);
+            border-bottom-left-radius: 0.25rem;
+            border-left: 4px solid #4caf50;
         }
         
         .message-time {
@@ -178,6 +188,31 @@
             cursor: pointer;
             color: white;
         }
+        
+        .math-expression {
+            font-family: monospace;
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.3rem;
+            direction: ltr;
+            display: inline-block;
+            margin: 0 0.2rem;
+        }
+        
+        .math-result {
+            font-weight: bold;
+            color: #2e7d32;
+            direction: ltr;
+            display: inline-block;
+        }
+        
+        .dark-mode .math-expression {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .dark-mode .math-result {
+            color: #81c784;
+        }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
 </head>
@@ -185,13 +220,13 @@
     <div class="header">
         <button class="settings-btn">⚙️</button>
         <button class="theme-toggle" id="themeToggle">🌙</button>
-        <h1>چت‌بات هوشمند BK AI</h1>
-        <p>هوش مصنوعی که واقعاً می‌فهمد!</p>
+        <h1>چت‌بات هوشمند BK AI+</h1>
+        <p>هوش مصنوعی با قابلیت درک کامل و محاسبات ریاضی</p>
     </div>
     
     <div class="chat-container" id="chatContainer">
         <div class="message bot-message">
-            سلام! من BK AI هستم، یک چت‌بات هوشمند. چطور می‌تونم کمکتون کنم؟
+            سلام! من BK AI+ هستم، یک چت‌بات هوشمند با قابلیت درک کامل و محاسبات ریاضی. چطور می‌تونم کمکتون کنم؟
             <div class="message-time">همین الان</div>
         </div>
     </div>
@@ -205,179 +240,306 @@
     </div>
     
     <div class="input-container">
-        <input type="text" id="userInput" placeholder="پیام خود را بنویسید..." autocomplete="off">
+        <input type="text" id="userInput" placeholder="پیام خود را بنویسید یا یک محاسبه ریاضی وارد کنید..." autocomplete="off">
         <button id="sendBtn">ارسال</button>
     </div>
 
     <script>
-        // ====== سیستم درک زبان طبیعی ساده ======
-        class SimpleNLP {
+        // ====== سیستم درک زبان طبیعی پیشرفته ======
+        class AdvancedNLP {
             constructor() {
-                this.patterns = this.initializePatterns();
-                this.context = {};
+                this.context = {
+                    userName: null,
+                    lastTopics: [],
+                    userInterests: []
+                };
             }
             
-            initializePatterns() {
-                return [
-                    // الگوهای سلام و احوالپرسی
-                    {
-                        pattern: /(سلام|درود|هی|صبح بخیر|عصر بخیر|شب بخیر)/i,
-                        category: "greeting",
-                        responses: [
-                            "سلام! چطور می‌تونم کمک کنم؟",
-                            "درود بر شما! حالتون چطوره؟",
-                            "سلام! خوشحالم که باهات صحبت می‌کنم.",
-                            "هی! چه خبر؟ چطور می‌تونم کمکت کنم؟"
-                        ]
-                    },
-                    // الگوهای تشکر
-                    {
-                        pattern: /(ممنون|مرسی|تشکر|دست مریزاد|ممنونم|باتشکر)/i,
-                        category: "thanks",
-                        responses: [
-                            "خواهش می‌کنم!",
-                            "قابلی نداشت!",
-                            "خوشحالم که تونستم کمک کنم!",
-                            "همیشه در خدمت شما هستم!"
-                        ]
-                    },
-                    // الگوهای پرسش درباره خود ربات
-                    {
-                        pattern: /(تو کیستی|اسم تو چیه|تو چی هستی|تو چیست|你是谁|what are you|who are you)/i,
-                        category: "about_bot",
-                        responses: [
-                            "من BK AI هستم، یک چت‌بات هوشمند که برای کمک به شما طراحی شده‌ام.",
-                            "اسم من BK AI هست. من یک دستیار هوشمندم که می‌تونم باهات صحبت کنم و کمکت کنم.",
-                            "من یک هوش مصنوعی هستم که می‌تونم به سوالات شما پاسخ بدم و باهات گفتگو کنم."
-                        ]
-                    },
-                    // الگوهای پرسش درباره نام کاربر
-                    {
-                        pattern: /(اسمم|نامم|من .+ هستم|اسم من|my name is|I am)/i,
-                        category: "user_name",
-                        responses: [
-                            "چه اسم قشنگی! خوشحالم که باهات آشنا شدم.",
-                            "اسم خوبی داری! خوش اومدی.",
-                            "چه اسم زیبایی! خوشحالم که باهات صحبت می‌کنم."
-                        ],
-                        extractor: (message) => {
-                            const matches = message.match(/(اسمم|نامم|من) (.+) (هستم|است|am|is)/i);
-                            return matches ? matches[2] : null;
-                        }
-                    },
-                    // الگوهای پرسش درباره زمان
-                    {
-                        pattern: /(ساعت چنده|وقت چنده|几点了|what time|what is the time)/i,
-                        category: "time",
-                        responses: [
-                            "همین الان ساعت {{time}} هست.",
-                            "الان ساعت {{time}} هست.",
-                            "ساعت {{time}} هست."
-                        ]
-                    },
-                    // الگوهای پرسش درباره تاریخ
-                    {
-                        pattern: /(امروز چندمه|تاریخ امروز|今天是|what date|what is the date)/i,
-                        category: "date",
-                        responses: [
-                            "امروز {{date}} هست.",
-                            "الان {{date}} هست.",
-                            "تاریخ امروز: {{date}}"
-                        ]
-                    },
-                    // الگوهای خداحافظی
-                    {
-                        pattern: /(خداحافظ|بای|خدانگهدار|bye|goodbye|see you)/i,
-                        category: "goodbye",
-                        responses: [
-                            "خداحافظ! امیدوارم بازم ببینمت.",
-                            "بای! روز خوبی داشته باشی.",
-                            "خدانگهدار! همیشه سلامت باشی."
-                        ]
-                    },
-                    // الگوهای سوالات عمومی
-                    {
-                        pattern: /(چطور|چگونه|چرا|چی|چه|کی|کجا|چند|how|why|what|when|where|which|who)/i,
-                        category: "question",
-                        responses: [
-                            "سوال جالبی پرسیدی. فکر می‌کنم جوابش این باشه که...",
-                            "خب، این بستگی به عوامل مختلفی داره...",
-                            "از دیدگاه من، میشه اینطور看待 کرد که...",
-                            "به نظر من، این موضوع رو میشه از چند جنبه مختلف بررسی کرد..."
-                        ]
-                    },
-                    // الگوهای احساسات
-                    {
-                        pattern: /(خوشحالم|غمگینم|عصبانیم|خستم|استرس دارم|ناراحتم|نگرانم|happy|sad|angry|tired)/i,
-                        category: "emotion",
-                        responses: [
-                            "متوجه احساست میشم. می‌خوای در موردش بیشتر صحبت کنیم؟",
-                            "احساساتت رو درک می‌کنم. اگر دوست داری، می‌تونیم بیشتر حرف بزنیم.",
-                            "ممنون که احساساتت رو با من در میان گذاشتی. دوست داری بیشتر صحبت کنیم؟"
-                        ]
-                    }
-                ];
+            processMessage(message) {
+                // پیش‌پردازش پیام
+                const preprocessed = this.preprocessMessage(message);
+                
+                // تشخیص نوع پیام
+                const messageType = this.detectMessageType(preprocessed);
+                
+                // پردازش بر اساس نوع پیام
+                switch(messageType) {
+                    case 'math':
+                        return this.processMathExpression(preprocessed);
+                    case 'greeting':
+                        return this.generateResponse('greeting');
+                    case 'thanks':
+                        return this.generateResponse('thanks');
+                    case 'question':
+                        return this.answerQuestion(preprocessed);
+                    case 'personal':
+                        return this.handlePersonalMessage(preprocessed);
+                    case 'emotion':
+                        return this.handleEmotion(preprocessed);
+                    default:
+                        return this.generateResponse('default');
+                }
             }
             
-            understand(message) {
+            preprocessMessage(message) {
+                // تبدیل اعداد فارسی به انگلیسی برای پردازش ریاضی
+                let processed = message.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+                
+                // حذف کاراکترهای اضافی
+                processed = processed.replace(/[؟?،,;؛]/g, '');
+                
+                return processed;
+            }
+            
+            detectMessageType(message) {
                 const lowerMessage = message.toLowerCase();
                 
-                // بررسی الگوها
-                for (const patternObj of this.patterns) {
-                    if (patternObj.pattern.test(message)) {
-                        const response = this.getResponse(patternObj, message);
+                // تشخیص عبارات ریاضی
+                if (this.isMathExpression(lowerMessage)) {
+                    return 'math';
+                }
+                
+                // تشخیص سلام و احوالپرسی
+                if (/(سلام|درود|هی|صبح بخیر|عصر بخیر|شب بخیر|hello|hi|hey)/i.test(lowerMessage)) {
+                    return 'greeting';
+                }
+                
+                // تشخیص تشکر
+                if (/(ممنون|مرسی|تشکر|دست مریزاد|ممنونم|باتشکر|thanks|thank you)/i.test(lowerMessage)) {
+                    return 'thanks';
+                }
+                
+                // تشخیص سوال
+                if (/(چطور|چگونه|چرا|چی|چه|کی|کجا|چند|how|why|what|when|where|which|who|آیا)/i.test(lowerMessage)) {
+                    return 'question';
+                }
+                
+                // تشخیص پیام‌های شخصی
+                if (/(اسم|نام|سن|شغل|تحصیلات|علاقه|اهل|زندگی|خانواده|name|age|job)/i.test(lowerMessage)) {
+                    return 'personal';
+                }
+                
+                // تشخیص احساسات
+                if (/(خوشحالم|غمگینم|عصبانیم|خستم|استرس دارم|ناراحتم|نگرانم|خوشحال|غمگین|عصبانی|خسته|happy|sad|angry|tired)/i.test(lowerMessage)) {
+                    return 'emotion';
+                }
+                
+                return 'default';
+            }
+            
+            isMathExpression(message) {
+                // تشخیص عبارات ریاضی با استفاده از regex
+                const mathRegex = /(\d+\s*[\+\-\×\÷\*\/().]\s*)+\d+/;
+                const persianMathRegex = /(چقدر میشه|محاسبه کن|حاصل|مساوی|برابر|به اضافه|منهای|ضرب در|تقسیم بر)/;
+                
+                return mathRegex.test(message) || persianMathRegex.test(message);
+            }
+            
+            processMathExpression(message) {
+                try {
+                    // استخراج عبارت ریاضی
+                    let mathExpr = this.extractMathExpression(message);
+                    
+                    // جایگزینی عملگرهای فارسی با انگلیسی
+                    mathExpr = mathExpr.replace(/×/g, '*')
+                                      .replace(/÷/g, '/')
+                                      .replace(/به اضافه/gi, '+')
+                                      .replace(/منهای/gi, '-')
+                                      .replace(/ضرب در/gi, '*')
+                                      .replace(/تقسیم بر/gi, '/');
+                    
+                    // حذف فضاهای اضافی
+                    mathExpr = mathExpr.replace(/\s+/g, '');
+                    
+                    // ارزیابی عبارت ریاضی
+                    const result = this.safeEval(mathExpr);
+                    
+                    // تولید پاسخ
+                    return {
+                        type: 'math',
+                        expression: mathExpr,
+                        result: result,
+                        response: `حاصل <span class="math-expression">${mathExpr}</span> برابر است با <span class="math-result">${result}</span>`
+                    };
+                } catch (error) {
+                    return {
+                        type: 'error',
+                        response: 'متأسفانه در محاسبه عبارت ریاضی خطایی رخ داد. لطفاً عبارت را به شکل دیگری وارد کنید.'
+                    };
+                }
+            }
+            
+            extractMathExpression(message) {
+                // استخراج عبارت ریاضی از پیام
+                const mathRegex = /((\d+[\+\-\*\/\(\)].*)|\d+)/;
+                const match = message.match(mathRegex);
+                
+                if (match) {
+                    return match[0];
+                }
+                
+                // اگر عبارت ریاضی مستقیم پیدا نشد، سعی می‌کنیم از پیام استخراج کنیم
+                if (message.includes('چقدر میشه')) {
+                    return message.replace('چقدر میشه', '').trim();
+                }
+                
+                if (message.includes('محاسبه کن')) {
+                    return message.replace('محاسبه کن', '').trim();
+                }
+                
+                return message;
+            }
+            
+            safeEval(expr) {
+                // ارزیابی ایمن عبارت ریاضی
+                try {
+                    // جایگزینی عملگرهای غیراستاندارد
+                    expr = expr.replace(/[^0-9+\-*/().]/g, '');
+                    
+                    // استفاده از Function برای ارزیابی ایمن
+                    return Function(`"use strict"; return (${expr})`)();
+                } catch (error) {
+                    throw new Error('عبارت ریاضی نامعتبر است');
+                }
+            }
+            
+            generateResponse(type) {
+                const responses = {
+                    greeting: [
+                        "سلام! چطور می‌تونم کمک کنم؟",
+                        "درود بر شما! حالتون چطوره؟",
+                        "سلام! خوشحالم که باهات صحبت می‌کنم.",
+                        "هی! چه خبر؟ چطور می‌تونم کمکت کنم؟"
+                    ],
+                    thanks: [
+                        "خواهش می‌کنم!",
+                        "قابلی نداشت!",
+                        "خوشحالم که تونستم کمک کنم!",
+                        "همیشه در خدمت شما هستم!",
+                        "خوشحالم که راضیتون کردم!"
+                    ],
+                    default: [
+                        "جالب بود! می‌خوای بیشتر در این مورد صحبت کنیم؟",
+                        "منظورت رو کامل متوجه نشدم، میشه کمی بیشتر توضیح بدی؟",
+                        "درباره این موضوع مطمئن نیستم، میتونی یه کم بیشتر توضیح بدی؟",
+                        "جالب است! دوست داری بیشتر در این مورد صحبت کنیم؟",
+                        "می‌تونی سوالت رو به شکل دیگری بپرسی؟ شاید بهتر بتونم کمکت کنم."
+                    ]
+                };
+                
+                const responseList = responses[type] || responses.default;
+                return {
+                    type: type,
+                    response: responseList[Math.floor(Math.random() * responseList.length)]
+                };
+            }
+            
+            answerQuestion(question) {
+                // پاسخ به سوالات متداول
+                const lowerQuestion = question.toLowerCase();
+                
+                if (/(چطور|چگونه)/i.test(lowerQuestion)) {
+                    return {
+                        type: 'question',
+                        response: "برای این سوال، باید بگم که روش‌های مختلفی وجود داره. می‌تونی کمی بیشتر توضیح بدی تا بتونم بهتر راهنمایی‌ت کنم؟"
+                    };
+                }
+                
+                if (/(چرا)/i.test(lowerQuestion)) {
+                    return {
+                        type: 'question',
+                        response: "دلایل مختلفی می‌تونه داشته باشه. شاید بتونم با اطلاعات بیشتری که بهم میدی، پاسخ بهتری برات提供 کنم."
+                    };
+                }
+                
+                if (/(کی|چه زمانی)/i.test(lowerQuestion)) {
+                    return {
+                        type: 'question',
+                        response: "زمانش بستگی به عوامل مختلفی داره. اگر اطلاعات بیشتری提供 کنی، می‌تونم دقیق‌تر کمکت کنم."
+                    };
+                }
+                
+                return this.generateResponse('default');
+            }
+            
+            handlePersonalMessage(message) {
+                const lowerMessage = message.toLowerCase();
+                
+                // استخراج نام کاربر
+                if (/(اسمم|نامم|من .+ هستم|اسم من|my name is|I am)/i.test(lowerMessage)) {
+                    const nameMatch = message.match(/(اسمم|نامم|من) (.+) (هستم|است|am|is)/i);
+                    if (nameMatch && nameMatch[2]) {
+                        this.context.userName = nameMatch[2];
                         return {
-                            category: patternObj.category,
-                            response: response,
-                            extractedData: patternObj.extractor ? patternObj.extractor(message) : null
+                            type: 'personal',
+                            response: `چه اسم قشنگی! ${this.context.userName} عزیز، خوشحالم که باهات آشنا شدم.`
                         };
                     }
                 }
                 
-                // اگر هیچ الگویی匹配 نشد
+                // پاسخ به سوالات شخصی
+                if (/(چند سالته|سن تو|age)/i.test(lowerMessage)) {
+                    return {
+                        type: 'personal',
+                        response: "من یک هوش مصنوعی هستم، بنابراین سن به معنی سن انسان‌ها رو ندارم. اما از زمانی که ایجاد شدم، مدتی می‌گذره!"
+                    };
+                }
+                
+                if (/(کجایی|اهل کجا|where are you)/i.test(lowerMessage)) {
+                    return {
+                        type: 'personal',
+                        response: "من در فضای دیجیتال زندگی می‌کنم! می‌تونم در هر جایی که اینترنت باشه، در خدمتت باشم."
+                    };
+                }
+                
                 return {
-                    category: "unknown",
-                    response: this.getDefaultResponse(message),
-                    extractedData: null
+                    type: 'personal',
+                    response: "ممنون که این اطلاعات رو با من در میان گذاشتی. دوست داری بیشتر درباره خودت بگی؟"
                 };
             }
             
-            getResponse(patternObj, message) {
-                const responses = patternObj.responses;
-                const randomIndex = Math.floor(Math.random() * responses.length);
-                let response = responses[randomIndex];
+            handleEmotion(message) {
+                const lowerMessage = message.toLowerCase();
                 
-                // جایگزینی dynamic values
-                if (patternObj.category === "time") {
-                    const now = new Date();
-                    const time = now.toLocaleTimeString('fa-IR');
-                    response = response.replace("{{time}}", time);
-                } else if (patternObj.category === "date") {
-                    const now = new Date();
-                    const date = now.toLocaleDateString('fa-IR');
-                    response = response.replace("{{date}}", date);
+                if (/(خوشحالم|خوشحال|happy)/i.test(lowerMessage)) {
+                    return {
+                        type: 'emotion',
+                        response: "چه عالی که خوشحالی! 😊 باعث خوشحالیه که حال تو خوبه. می‌خوای درباره دلیل خوشحالیت بیشتر بگی؟"
+                    };
                 }
                 
-                return response;
-            }
-            
-            getDefaultResponse(message) {
-                const defaultResponses = [
-                    "جالب بود! می‌خوای بیشتر در این مورد صحبت کنیم؟",
-                    "منظورت رو کامل متوجه نشدم، میشه کمی بیشتر توضیح بدی؟",
-                    "درباره این موضوع مطمئن نیستم، میتونی یه کم بیشتر توضیح بدی؟",
-                    "جالب است! دوست داری بیشتر در این مورد صحبت کنیم؟",
-                    "می‌تونی سوالت رو به شکل دیگری بپرسی؟ شاید بهتر بتونم کمکت کنم."
-                ];
+                if (/(غمگینم|ناراحتم|غمگین|ناراحت|sad)/i.test(lowerMessage)) {
+                    return {
+                        type: 'emotion',
+                        response: "متأسفم که احساس ناراحتی می‌کنی. 😔 اگر دوست داری، می‌تونی با من دربارهش صحبت کنی. شاید بتونم کمکت کنم."
+                    };
+                }
                 
-                return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+                if (/(عصبانیم|عصبانی|angry)/i.test(lowerMessage)) {
+                    return {
+                        type: 'emotion',
+                        response: "به نظر می‌رسه که از چیزی عصبانی هستی. 😠 می‌تونی بیشتر دربارهش بگی؟ شاید بتونم کمکت کنم که آروم بشی."
+                    };
+                }
+                
+                if (/(خستم|خسته|tired)/i.test(lowerMessage)) {
+                    return {
+                        type: 'emotion',
+                        response: "به نظر می‌رسه که خسته هستی. 😴 استراحت می‌تونه کمک کنه که شارژ بشی. می‌خوای دربارهش صحبت کنیم؟"
+                    };
+                }
+                
+                return {
+                    type: 'emotion',
+                    response: "متوجه احساست میشم. اگر دوست داری، می‌تونیم بیشتر دربارهش صحبت کنیم."
+                };
             }
         }
 
         // ====== مدیریت چت‌بات ======
         class ChatManager {
             constructor() {
-                this.nlp = new SimpleNLP();
+                this.nlp = new AdvancedNLP();
                 this.setupEventListeners();
                 this.loadSettings();
             }
@@ -414,20 +576,13 @@
             }
             
             processMessage(message) {
-                const understanding = this.nlp.understand(message);
+                const result = this.nlp.processMessage(message);
                 
-                // اگر نام کاربر استخراج شد، ذخیره کنید
-                if (understanding.extractedData) {
-                    this.userName = understanding.extractedData;
+                if (result.type === 'math') {
+                    this.addMathMessage(result.response, result.expression, result.result);
+                } else {
+                    this.addMessage(result.response, 'bot');
                 }
-                
-                // شخصی‌سازی پاسخ با نام کاربر
-                let response = understanding.response;
-                if (this.userName) {
-                    response = response.replace(/تو/gi, this.userName);
-                }
-                
-                this.addMessage(response, 'bot');
             }
             
             addMessage(text, type) {
@@ -437,7 +592,26 @@
                 messageDiv.classList.add('message', type === 'user' ? 'user-message' : 'bot-message');
                 
                 const messageText = document.createElement('div');
-                messageText.textContent = text;
+                messageText.innerHTML = text;
+                messageDiv.appendChild(messageText);
+                
+                const messageTime = document.createElement('div');
+                messageTime.classList.add('message-time');
+                messageTime.textContent = new Date().toLocaleTimeString('fa-IR');
+                messageDiv.appendChild(messageTime);
+                
+                chatContainer.appendChild(messageDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
+            addMathMessage(text, expression, result) {
+                const chatContainer = document.getElementById('chatContainer');
+                const messageDiv = document.createElement('div');
+                
+                messageDiv.classList.add('message', 'math-message');
+                
+                const messageText = document.createElement('div');
+                messageText.innerHTML = text;
                 messageDiv.appendChild(messageText);
                 
                 const messageTime = document.createElement('div');
