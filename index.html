@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>چت‌بات هوشمند BK AI+</title>
+    <title>چت‌بات هوشمند BK AI Pro</title>
     <style>
         :root {
             --primary-color: #4a6fa5;
@@ -12,9 +12,11 @@
             --user-message-bg: #e3f2fd;
             --bot-message-bg: #f1f0f0;
             --math-message-bg: #e8f5e9;
+            --search-message-bg: #fff3cd;
             --font-family: "Vazirmatn", "Tanha", "Segoe UI", Tahoma, sans-serif;
             --text-color: #333;
             --border-color: #ddd;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .dark-mode {
@@ -24,8 +26,10 @@
             --user-message-bg: #2a4b7c;
             --bot-message-bg: #3a3a3a;
             --math-message-bg: #2d4a2d;
+            --search-message-bg: #5c4b15;
             --text-color: #f0f0f0;
             --border-color: #444;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
         
         * {
@@ -49,7 +53,7 @@
             color: white;
             padding: 1rem;
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow);
             position: relative;
         }
         
@@ -59,42 +63,50 @@
             padding: 1rem;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 0.75rem;
         }
         
         .message {
-            max-width: 80%;
-            padding: 0.75rem;
-            border-radius: 1rem;
+            max-width: 85%;
+            padding: 0.75rem 1rem;
+            border-radius: 1.2rem;
             animation: fadeIn 0.3s ease;
             position: relative;
             border: 1px solid var(--border-color);
             line-height: 1.6;
+            box-shadow: var(--shadow);
         }
         
         .user-message {
             align-self: flex-end;
             background-color: var(--user-message-bg);
-            border-bottom-right-radius: 0.25rem;
+            border-bottom-right-radius: 0.4rem;
         }
         
         .bot-message {
             align-self: flex-start;
             background-color: var(--bot-message-bg);
-            border-bottom-left-radius: 0.25rem;
+            border-bottom-left-radius: 0.4rem;
         }
         
         .math-message {
             align-self: flex-start;
             background-color: var(--math-message-bg);
-            border-bottom-left-radius: 0.25rem;
+            border-bottom-left-radius: 0.4rem;
             border-left: 4px solid #4caf50;
+        }
+        
+        .search-message {
+            align-self: flex-start;
+            background-color: var(--search-message-bg);
+            border-bottom-left-radius: 0.4rem;
+            border-left: 4px solid #ffc107;
         }
         
         .message-time {
             font-size: 0.7rem;
             color: var(--secondary-color);
-            margin-top: 0.25rem;
+            margin-top: 0.5rem;
             text-align: right;
         }
         
@@ -103,51 +115,67 @@
             padding: 1rem;
             background-color: var(--bot-message-bg);
             border-top: 1px solid var(--border-color);
+            gap: 0.5rem;
         }
         
         #userInput {
             flex: 1;
-            padding: 0.75rem;
+            padding: 0.75rem 1rem;
             border: 1px solid var(--border-color);
             border-radius: 1.5rem;
             font-family: var(--font-family);
             outline: none;
             background-color: var(--background-color);
             color: var(--text-color);
+            font-size: 1rem;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s;
+        }
+        
+        #userInput:focus {
+            border-color: var(--primary-color);
         }
         
         #sendBtn {
-            margin-right: 0.5rem;
             padding: 0.75rem 1.5rem;
             background-color: var(--primary-color);
             color: white;
             border: none;
             border-radius: 1.5rem;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         
         #sendBtn:hover {
             background-color: #3a5a80;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        #sendBtn:active {
+            transform: translateY(0);
         }
         
         .typing-indicator {
             display: none;
             align-self: flex-start;
             background-color: var(--bot-message-bg);
-            padding: 0.75rem;
-            border-radius: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 1.2rem;
             margin-bottom: 0.5rem;
+            box-shadow: var(--shadow);
         }
         
         .typing-dots {
             display: flex;
-            gap: 0.25rem;
+            gap: 0.35rem;
         }
         
         .typing-dot {
-            width: 0.5rem;
-            height: 0.5rem;
+            width: 0.6rem;
+            height: 0.6rem;
             background-color: var(--secondary-color);
             border-radius: 50%;
             animation: typingAnimation 1.4s infinite ease-in-out;
@@ -176,8 +204,16 @@
             font-size: 1.5rem;
             cursor: pointer;
             color: white;
+            transition: transform 0.3s;
+            padding: 0.5rem;
+            border-radius: 50%;
         }
 
+        .settings-btn:hover {
+            transform: rotate(45deg);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
         .theme-toggle {
             position: absolute;
             right: 1rem;
@@ -187,6 +223,14 @@
             font-size: 1.5rem;
             cursor: pointer;
             color: white;
+            transition: transform 0.3s;
+            padding: 0.5rem;
+            border-radius: 50%;
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            background-color: rgba(255, 255, 255, 0.1);
         }
         
         .math-expression {
@@ -197,6 +241,7 @@
             direction: ltr;
             display: inline-block;
             margin: 0 0.2rem;
+            font-weight: bold;
         }
         
         .math-result {
@@ -213,22 +258,236 @@
         .dark-mode .math-result {
             color: #81c784;
         }
+        
+        .search-results {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: 0.8rem;
+            font-size: 0.9rem;
+        }
+        
+        .dark-mode .search-results {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .search-result-item {
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        
+        .search-result-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .search-result-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.25rem;
+        }
+        
+        .search-result-link {
+            color: var(--secondary-color);
+            font-size: 0.8rem;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+        
+        .search-result-link:hover {
+            text-decoration: underline;
+        }
+        
+        .search-result-snippet {
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+        
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            left: -320px;
+            width: 320px;
+            height: 100%;
+            background: var(--bot-message-bg);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+            padding: 1.5rem;
+            transition: left 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .settings-panel.active {
+            left: 0;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .settings-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .close-settings {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: transform 0.3s;
+        }
+        
+        .close-settings:hover {
+            transform: scale(1.1);
+        }
+
+        .setting-item {
+            margin-bottom: 1.25rem;
+        }
+
+        .setting-item label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .setting-item input, .setting-item select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+        
+        .setting-item select {
+            cursor: pointer;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-family: var(--font-family);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: #ff4757;
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .suggestion-chips {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: var(--bot-message-bg);
+            border-top: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+        
+        .suggestion-chip {
+            padding: 0.5rem 1rem;
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 1.5rem;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        
+        .suggestion-chip:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        @media (max-width: 768px) {
+            .message {
+                max-width: 90%;
+            }
+            
+            .settings-panel {
+                width: 85%;
+                left: -85%;
+            }
+            
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .header p {
+                font-size: 0.9rem;
+            }
+        }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
 </head>
 <body>
     <div class="header">
-        <button class="settings-btn">⚙️</button>
+        <button class="settings-btn" id="settingsBtn">⚙️</button>
         <button class="theme-toggle" id="themeToggle">🌙</button>
-        <h1>چت‌بات هوشمند BK AI+</h1>
-        <p>هوش مصنوعی با قابلیت درک کامل و محاسبات ریاضی</p>
+        <h1>چت‌بات هوشمند BK AI Pro</h1>
+        <p>هوش مصنوعی با درک پیشرفته زبان و قابلیت جستجو</p>
     </div>
     
     <div class="chat-container" id="chatContainer">
         <div class="message bot-message">
-            سلام! من BK AI+ هستم، یک چت‌بات هوشمند با قابلیت درک کامل و محاسبات ریاضی. چطور می‌تونم کمکتون کنم؟
+            سلام! من BK AI Pro هستم، یک چت‌بات هوشمند با قابلیت درک پیشرفته زبان و جستجو. چگونه می‌توانم به شما کمک کنم؟
             <div class="message-time">همین الان</div>
         </div>
+    </div>
+    
+    <div class="suggestion-chips" id="suggestionChips">
+        <div class="suggestion-chip" data-query="سلام، حالت چطوره؟">سلام، حالت چطوره؟</div>
+        <div class="suggestion-chip" data-query="محاسبه کن ۱۲۵ ضربدر ۴۳">محاسبه کن ۱۲۵ × ۴۳</div>
+        <div class="suggestion-chip" data-query="جستجو در مورد هوش مصنوعی">جستجو: هوش مصنوعی</div>
+        <div class="suggestion-chip" data-query="چطور می‌تونم برنامه نویسی یاد بگیرم؟">برنامه نویسی یاد بگیرم</div>
     </div>
     
     <div class="typing-indicator" id="typingIndicator">
@@ -244,6 +503,60 @@
         <button id="sendBtn">ارسال</button>
     </div>
 
+    <div class="overlay" id="overlay"></div>
+    
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">
+            <h2 class="settings-title">تنظیمات</h2>
+            <button class="close-settings" id="closeSettings">×</button>
+        </div>
+        
+        <div class="setting-item">
+            <label for="userName">نام شما</label>
+            <input type="text" id="userName" placeholder="نام خود را وارد کنید">
+        </div>
+        
+        <div class="setting-item">
+            <label for="chatMode">مود گفتگو</label>
+            <select id="chatMode">
+                <option value="normal">عادی</option>
+                <option value="friendly">دوستانه 🤝</option>
+                <option value="professional">حرفه‌ای 💼</option>
+                <option value="funny">خنده دار 😂</option>
+            </select>
+        </div>
+        
+        <div class="setting-item">
+            <label for="responseLength">طول پاسخ</label>
+            <select id="responseLength">
+                <option value="short">کوتاه</option>
+                <option value="medium" selected>متوسط</option>
+                <option value="long">طولانی</option>
+            </select>
+        </div>
+        
+        <div class="setting-item">
+            <label for="searchEngine">موتور جستجو</label>
+            <select id="searchEngine">
+                <option value="duckduckgo">DuckDuckGo</option>
+                <option value="wikipedia">ویکی‌پدیا</option>
+                <option value="both">هر دو</option>
+            </select>
+        </div>
+        
+        <div class="setting-item">
+            <button id="clearHistoryBtn" class="btn btn-danger" style="width: 100%">
+                پاک کردن تاریخچه گفتگو
+            </button>
+        </div>
+        
+        <div class="setting-item">
+            <button id="resetSettingsBtn" class="btn" style="width: 100%; background-color: var(--secondary-color); color: white">
+                بازنشانی تنظیمات
+            </button>
+        </div>
+    </div>
+
     <script>
         // ====== سیستم درک زبان طبیعی پیشرفته ======
         class AdvancedNLP {
@@ -251,34 +564,189 @@
                 this.context = {
                     userName: null,
                     lastTopics: [],
-                    userInterests: []
+                    userInterests: [],
+                    conversationHistory: []
                 };
+                this.setupPatterns();
+            }
+            
+            setupPatterns() {
+                this.patterns = [
+                    // الگوهای سلام و احوالپرسی
+                    {
+                        pattern: /(سلام|درود|هی|صبح بخیر|عصر بخیر|شب بخیر|hello|hi|hey)/i,
+                        category: "greeting",
+                        responses: [
+                            "سلام! چطور می‌تونم کمک کنم؟",
+                            "درود بر شما! حالتون چطوره؟",
+                            "سلام! خوشحالم که باهات صحبت می‌کنم.",
+                            "هی! چه خبر؟ چطور می‌تونم کمکت کنم؟"
+                        ]
+                    },
+                    // الگوهای تشکر
+                    {
+                        pattern: /(ممنون|مرسی|تشکر|دست مریزاد|ممنونم|باتشکر|thanks|thank you)/i,
+                        category: "thanks",
+                        responses: [
+                            "خواهش می‌کنم!",
+                            "قابلی نداشت!",
+                            "خوشحالم که تونستم کمک کنم!",
+                            "همیشه در خدمت شما هستم!",
+                            "خوشحالم که راضیتون کردم!"
+                        ]
+                    },
+                    // الگوهای پرسش درباره خود ربات
+                    {
+                        pattern: /(تو کیستی|اسم تو چیه|تو چی هستی|تو چیست|你是谁|what are you|who are you)/i,
+                        category: "about_bot",
+                        responses: [
+                            "من BK AI Pro هستم، یک چت‌بات هوشمند که برای کمک به شما طراحی شده‌ام.",
+                            "اسم من BK AI Pro هست. من یک دستیار هوشمندم که می‌تونم باهات صحبت کنم و کمکت کنم.",
+                            "من یک هوش مصنوعی پیشرفته هستم که می‌تونم به سوالات شما پاسخ بدم و باهات گفتگو کنم."
+                        ]
+                    },
+                    // الگوهای پرسش درباره نام کاربر
+                    {
+                        pattern: /(اسمم|نامم|من (.+) هستم|اسم من|my name is|I am)/i,
+                        category: "user_name",
+                        responses: [
+                            "چه اسم قشنگی! خوشحالم که باهات آشنا شدم.",
+                            "اسم خوبی داری! خوش اومدی.",
+                            "چه اسم زیبایی! خوشحالم که باهات صحبت می‌کنم."
+                        ],
+                        extractor: (message) => {
+                            const matches = message.match(/(اسمم|نامم|من) (.+) (هستم|است|am|is)/i);
+                            return matches ? matches[2] : null;
+                        }
+                    },
+                    // الگوهای پرسش درباره زمان
+                    {
+                        pattern: /(ساعت چنده|وقت چنده|几点了|what time|what is the time)/i,
+                        category: "time",
+                        responses: [
+                            "همین الان ساعت {{time}} هست.",
+                            "الان ساعت {{time}} هست.",
+                            "ساعت {{time}} هست."
+                        ]
+                    },
+                    // الگوهای پرسش درباره تاریخ
+                    {
+                        pattern: /(امروز چندمه|تاریخ امروز|今天是|what date|what is the date)/i,
+                        category: "date",
+                        responses: [
+                            "امروز {{date}} هست.",
+                            "الان {{date}} هست.",
+                            "تاریخ امروز: {{date}}"
+                        ]
+                    },
+                    // الگوهای خداحافظی
+                    {
+                        pattern: /(خداحافظ|بای|خدانگهدار|bye|goodbye|see you)/i,
+                        category: "goodbye",
+                        responses: [
+                            "خداحافظ! امیدوارم بازم ببینمت.",
+                            "بای! روز خوبی داشته باشی.",
+                            "خدانگهدار! همیشه سلامت باشی."
+                        ]
+                    },
+                    // الگوهای سوالات عمومی
+                    {
+                        pattern: /(چطور|چگونه|چرا|چی|چه|کی|کجا|چند|how|why|what|when|where|which|who)/i,
+                        category: "question",
+                        responses: [
+                            "سوال جالبی پرسیدی. فکر می‌کنم جوابش این باشه که...",
+                            "خب، این بستگی به عوامل مختلفی داره...",
+                            "از دیدگاه من، میشه اینطور看待 کرد که...",
+                            "به نظر من، این موضوع رو میشه از چند جنبه مختلف بررسی کرد..."
+                        ]
+                    },
+                    // الگوهای احساسات
+                    {
+                        pattern: /(خوشحالم|غمگینم|عصبانیم|خستم|استرس دارم|ناراحتم|نگرانم|happy|sad|angry|tired)/i,
+                        category: "emotion",
+                        responses: [
+                            "متوجه احساست میشم. می‌خوای در موردش بیشتر صحبت کنیم؟",
+                            "احساساتت رو درک می‌کنم. اگر دوست داری، می‌تونیم بیشتر حرف بزنیم.",
+                            "ممنون که احساساتت رو با من در میان گذاشتی. دوست داری بیشتر صحبت کنیم؟"
+                        ]
+                    },
+                    // الگوهای جستجو
+                    {
+                        pattern: /(جستجو|سرچ|search|بگرد|پیدا کن|درباره (.+) اطلاعات|در مورد (.+) بگو|search for|about )/i,
+                        category: "search",
+                        responses: [
+                            "در حال جستجو برای '{{query}}'...",
+                            "لحظه‌ای، دارم '{{query}}' رو جستجو می‌کنم...",
+                            "جستجو برای '{{query}}' انجام میشه..."
+                        ],
+                        extractor: (message) => {
+                            const searchPatterns = [
+                                /جستجو (?:در مورد|برای) (.+)/i,
+                                /سرچ (?:کن|برای) (.+)/i,
+                                /درباره (.+) اطلاعات/i,
+                                /در مورد (.+) بگو/i,
+                                /search for (.+)/i,
+                                /about (.+)/i
+                            ];
+                            
+                            for (const pattern of searchPatterns) {
+                                const match = message.match(pattern);
+                                if (match && match[1]) {
+                                    return match[1];
+                                }
+                            }
+                            
+                            return message;
+                        }
+                    },
+                    // الگوهای ریاضی
+                    {
+                        pattern: /(محاسبه|حساب|ریاضی|math|calculate|چقدر میشه|چنده|ضرب|تقسیم|جمع|تفریق|\+|\-|\×|\÷|\*|\/)/i,
+                        category: "math",
+                        responses: [
+                            "حاصل {{expression}} برابر است با {{result}}.",
+                            "نتیجه محاسبه: {{expression}} = {{result}}",
+                            "محاسبه انجام شد: {{expression}} = {{result}}"
+                        ]
+                    }
+                ];
             }
             
             processMessage(message) {
                 // پیش‌پردازش پیام
                 const preprocessed = this.preprocessMessage(message);
                 
+                // اضافه کردن به تاریخچه گفتگو
+                this.context.conversationHistory.push({
+                    type: 'user',
+                    message: message,
+                    time: new Date()
+                });
+                
                 // تشخیص نوع پیام
                 const messageType = this.detectMessageType(preprocessed);
                 
                 // پردازش بر اساس نوع پیام
+                let result;
                 switch(messageType) {
                     case 'math':
-                        return this.processMathExpression(preprocessed);
-                    case 'greeting':
-                        return this.generateResponse('greeting');
-                    case 'thanks':
-                        return this.generateResponse('thanks');
-                    case 'question':
-                        return this.answerQuestion(preprocessed);
-                    case 'personal':
-                        return this.handlePersonalMessage(preprocessed);
-                    case 'emotion':
-                        return this.handleEmotion(preprocessed);
+                        result = this.processMathExpression(preprocessed);
+                        break;
+                    case 'search':
+                        result = this.processSearchQuery(preprocessed);
+                        break;
                     default:
-                        return this.generateResponse('default');
+                        result = this.generateResponse(messageType, preprocessed);
                 }
+                
+                // اضافه کردن پاسخ به تاریخچه گفتگو
+                this.context.conversationHistory.push({
+                    type: 'bot',
+                    message: result.response,
+                    time: new Date()
+                });
+                
+                return result;
             }
             
             preprocessMessage(message) {
@@ -299,29 +767,16 @@
                     return 'math';
                 }
                 
-                // تشخیص سلام و احوالپرسی
-                if (/(سلام|درود|هی|صبح بخیر|عصر بخیر|شب بخیر|hello|hi|hey)/i.test(lowerMessage)) {
-                    return 'greeting';
+                // تشخیص جستجو
+                if (/(جستجو|سرچ|search|بگرد|پیدا کن|درباره (.+) اطلاعات|در مورد (.+) بگو|search for|about )/i.test(lowerMessage)) {
+                    return 'search';
                 }
                 
-                // تشخیص تشکر
-                if (/(ممنون|مرسی|تشکر|دست مریزاد|ممنونم|باتشکر|thanks|thank you)/i.test(lowerMessage)) {
-                    return 'thanks';
-                }
-                
-                // تشخیص سوال
-                if (/(چطور|چگونه|چرا|چی|چه|کی|کجا|چند|how|why|what|when|where|which|who|آیا)/i.test(lowerMessage)) {
-                    return 'question';
-                }
-                
-                // تشخیص پیام‌های شخصی
-                if (/(اسم|نام|سن|شغل|تحصیلات|علاقه|اهل|زندگی|خانواده|name|age|job)/i.test(lowerMessage)) {
-                    return 'personal';
-                }
-                
-                // تشخیص احساسات
-                if (/(خوشحالم|غمگینم|عصبانیم|خستم|استرس دارم|ناراحتم|نگرانم|خوشحال|غمگین|عصبانی|خسته|happy|sad|angry|tired)/i.test(lowerMessage)) {
-                    return 'emotion';
+                // تشخیص سایر انواع پیام
+                for (const patternObj of this.patterns) {
+                    if (patternObj.pattern.test(message)) {
+                        return patternObj.category;
+                    }
                 }
                 
                 return 'default';
@@ -355,16 +810,42 @@
                     const result = this.safeEval(mathExpr);
                     
                     // تولید پاسخ
+                    const response = this.generateResponse('math', message)
+                                        .replace('{{expression}}', mathExpr)
+                                        .replace('{{result}}', result);
+                    
                     return {
                         type: 'math',
                         expression: mathExpr,
                         result: result,
-                        response: `حاصل <span class="math-expression">${mathExpr}</span> برابر است با <span class="math-result">${result}</span>`
+                        response: response
                     };
                 } catch (error) {
                     return {
                         type: 'error',
                         response: 'متأسفانه در محاسبه عبارت ریاضی خطایی رخ داد. لطفاً عبارت را به شکل دیگری وارد کنید.'
+                    };
+                }
+            }
+            
+            processSearchQuery(message) {
+                try {
+                    // استخراج عبارت جستجو
+                    const query = this.extractSearchQuery(message);
+                    
+                    // تولید پاسخ
+                    const response = this.generateResponse('search', message)
+                                        .replace('{{query}}', query);
+                    
+                    return {
+                        type: 'search',
+                        query: query,
+                        response: response
+                    };
+                } catch (error) {
+                    return {
+                        type: 'error',
+                        response: 'متأسفانه در پردازش درخواست جستجو خطایی رخ داد. لطفاً عبارت را به شکل دیگری وارد کنید.'
                     };
                 }
             }
@@ -390,6 +871,27 @@
                 return message;
             }
             
+            extractSearchQuery(message) {
+                // استخراج عبارت جستجو از پیام
+                const searchPatterns = [
+                    /جستجو (?:در مورد|برای) (.+)/i,
+                    /سرچ (?:کن|برای) (.+)/i,
+                    /درباره (.+) اطلاعات/i,
+                    /در مورد (.+) بگو/i,
+                    /search for (.+)/i,
+                    /about (.+)/i
+                ];
+                
+                for (const pattern of searchPatterns) {
+                    const match = message.match(pattern);
+                    if (match && match[1]) {
+                        return match[1];
+                    }
+                }
+                
+                return message;
+            }
+            
             safeEval(expr) {
                 // ارزیابی ایمن عبارت ریاضی
                 try {
@@ -403,136 +905,142 @@
                 }
             }
             
-            generateResponse(type) {
-                const responses = {
-                    greeting: [
-                        "سلام! چطور می‌تونم کمک کنم؟",
-                        "درود بر شما! حالتون چطوره؟",
-                        "سلام! خوشحالم که باهات صحبت می‌کنم.",
-                        "هی! چه خبر؟ چطور می‌تونم کمکت کنم؟"
-                    ],
-                    thanks: [
-                        "خواهش می‌کنم!",
-                        "قابلی نداشت!",
-                        "خوشحالم که تونستم کمک کنم!",
-                        "همیشه در خدمت شما هستم!",
-                        "خوشحالم که راضیتون کردم!"
-                    ],
-                    default: [
-                        "جالب بود! می‌خوای بیشتر در این مورد صحبت کنیم؟",
-                        "منظورت رو کامل متوجه نشدم، میشه کمی بیشتر توضیح بدی؟",
-                        "درباره این موضوع مطمئن نیستم، میتونی یه کم بیشتر توضیح بدی؟",
-                        "جالب است! دوست داری بیشتر در این مورد صحبت کنیم؟",
-                        "می‌تونی سوالت رو به شکل دیگری بپرسی؟ شاید بهتر بتونم کمکت کنم."
-                    ]
-                };
+            generateResponse(type, message) {
+                // یافتن الگوی مناسب
+                const patternObj = this.patterns.find(p => p.category === type);
                 
-                const responseList = responses[type] || responses.default;
-                return {
-                    type: type,
-                    response: responseList[Math.floor(Math.random() * responseList.length)]
-                };
-            }
-            
-            answerQuestion(question) {
-                // پاسخ به سوالات متداول
-                const lowerQuestion = question.toLowerCase();
-                
-                if (/(چطور|چگونه)/i.test(lowerQuestion)) {
-                    return {
-                        type: 'question',
-                        response: "برای این سوال، باید بگم که روش‌های مختلفی وجود داره. می‌تونی کمی بیشتر توضیح بدی تا بتونم بهتر راهنمایی‌ت کنم؟"
-                    };
-                }
-                
-                if (/(چرا)/i.test(lowerQuestion)) {
-                    return {
-                        type: 'question',
-                        response: "دلایل مختلفی می‌تونه داشته باشه. شاید بتونم با اطلاعات بیشتری که بهم میدی، پاسخ بهتری برات提供 کنم."
-                    };
-                }
-                
-                if (/(کی|چه زمانی)/i.test(lowerQuestion)) {
-                    return {
-                        type: 'question',
-                        response: "زمانش بستگی به عوامل مختلفی داره. اگر اطلاعات بیشتری提供 کنی، می‌تونم دقیق‌تر کمکت کنم."
-                    };
-                }
-                
-                return this.generateResponse('default');
-            }
-            
-            handlePersonalMessage(message) {
-                const lowerMessage = message.toLowerCase();
-                
-                // استخراج نام کاربر
-                if (/(اسمم|نامم|من .+ هستم|اسم من|my name is|I am)/i.test(lowerMessage)) {
-                    const nameMatch = message.match(/(اسمم|نامم|من) (.+) (هستم|است|am|is)/i);
-                    if (nameMatch && nameMatch[2]) {
-                        this.context.userName = nameMatch[2];
-                        return {
-                            type: 'personal',
-                            response: `چه اسم قشنگی! ${this.context.userName} عزیز، خوشحالم که باهات آشنا شدم.`
-                        };
+                if (patternObj && patternObj.responses) {
+                    const responseList = patternObj.responses;
+                    const randomIndex = Math.floor(Math.random() * responseList.length);
+                    let response = responseList[randomIndex];
+                    
+                    // جایگزینی dynamic values
+                    if (type === "time") {
+                        const now = new Date();
+                        const time = now.toLocaleTimeString('fa-IR');
+                        response = response.replace("{{time}}", time);
+                    } else if (type === "date") {
+                        const now = new Date();
+                        const date = now.toLocaleDateString('fa-IR');
+                        response = response.replace("{{date}}", date);
+                    } else if (type === "user_name" && patternObj.extractor) {
+                        const userName = patternObj.extractor(message);
+                        if (userName) {
+                            this.context.userName = userName;
+                            response = response.replace("{{userName}}", userName);
+                        }
                     }
+                    
+                    return response;
                 }
                 
-                // پاسخ به سوالات شخصی
-                if (/(چند سالته|سن تو|age)/i.test(lowerMessage)) {
-                    return {
-                        type: 'personal',
-                        response: "من یک هوش مصنوعی هستم، بنابراین سن به معنی سن انسان‌ها رو ندارم. اما از زمانی که ایجاد شدم، مدتی می‌گذره!"
-                    };
-                }
+                // پاسخ پیش‌فرض
+                const defaultResponses = [
+                    "جالب بود! می‌خوای بیشتر در این مورد صحبت کنیم؟",
+                    "منظورت رو کامل متوجه نشدم، میشه کمی بیشتر توضیح بدی؟",
+                    "درباره این موضوع مطمئن نیستم، میتونی یه کم بیشتر توضیح بدی؟",
+                    "جالب است! دوست داری بیشتر در این مورد صحبت کنیم؟",
+                    "می‌تونی سوالت رو به شکل دیگری بپرسی؟ شاید بهتر بتونم کمکت کنم."
+                ];
                 
-                if (/(کجایی|اهل کجا|where are you)/i.test(lowerMessage)) {
-                    return {
-                        type: 'personal',
-                        response: "من در فضای دیجیتال زندگی می‌کنم! می‌تونم در هر جایی که اینترنت باشه، در خدمتت باشم."
-                    };
-                }
-                
-                return {
-                    type: 'personal',
-                    response: "ممنون که این اطلاعات رو با من در میان گذاشتی. دوست داری بیشتر درباره خودت بگی؟"
-                };
+                return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+            }
+        }
+
+        // ====== سیستم جستجوی پیشرفته ======
+        class SearchEngine {
+            constructor() {
+                this.providers = ['duckduckgo', 'wikipedia'];
             }
             
-            handleEmotion(message) {
-                const lowerMessage = message.toLowerCase();
-                
-                if (/(خوشحالم|خوشحال|happy)/i.test(lowerMessage)) {
-                    return {
-                        type: 'emotion',
-                        response: "چه عالی که خوشحالی! 😊 باعث خوشحالیه که حال تو خوبه. می‌خوای درباره دلیل خوشحالیت بیشتر بگی؟"
-                    };
+            async search(query, provider = 'duckduckgo') {
+                try {
+                    if (provider === 'duckduckgo') {
+                        return await this.searchDuckDuckGo(query);
+                    } else if (provider === 'wikipedia') {
+                        return await this.searchWikipedia(query);
+                    }
+                } catch (error) {
+                    console.error('Error in search:', error);
+                    return [{
+                        title: 'خطا در جستجو',
+                        link: '#',
+                        snippet: 'متأسفانه در انجام جستجو خطایی رخ داده است.',
+                        source: 'System'
+                    }];
                 }
-                
-                if (/(غمگینم|ناراحتم|غمگین|ناراحت|sad)/i.test(lowerMessage)) {
-                    return {
-                        type: 'emotion',
-                        response: "متأسفم که احساس ناراحتی می‌کنی. 😔 اگر دوست داری، می‌تونی با من دربارهش صحبت کنی. شاید بتونم کمکت کنم."
-                    };
+            }
+            
+            async searchDuckDuckGo(query) {
+                try {
+                    const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`خطای HTTP: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.AbstractText) {
+                        return [{
+                            title: data.Heading || `نتایج جستجو برای "${query}"`,
+                            link: `https://duckduckgo.com/?q=${encodeURIComponent(query)}`,
+                            snippet: data.AbstractText,
+                            source: "DuckDuckGo"
+                        }];
+                    } else {
+                        return [{
+                            title: `هیچ نتیجه‌ای برای "${query}" یافت نشد`,
+                            link: `https://duckduckgo.com/?q=${encodeURIComponent(query)}`,
+                            snippet: "لطفاً query جستجوی خود را تغییر دهید.",
+                            source: "DuckDuckGo"
+                        }];
+                    }
+                } catch (error) {
+                    console.error('Error fetching from DuckDuckGo:', error);
+                    return [{
+                        title: `جستجو برای "${query}"`,
+                        link: `https://duckduckgo.com/?q=${encodeURIComponent(query)}`,
+                        snippet: "برای مشاهده نتایج کامل بر روی لینک کلیک کنید.",
+                        source: "DuckDuckGo"
+                    }];
                 }
-                
-                if (/(عصبانیم|عصبانی|angry)/i.test(lowerMessage)) {
-                    return {
-                        type: 'emotion',
-                        response: "به نظر می‌رسه که از چیزی عصبانی هستی. 😠 می‌تونی بیشتر دربارهش بگی؟ شاید بتونم کمکت کنم که آروم بشی."
-                    };
+            }
+            
+            async searchWikipedia(query) {
+                try {
+                    const response = await fetch(`https://fa.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`خطای HTTP: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.query.search.length > 0) {
+                        return data.query.search.slice(0, 3).map(item => ({
+                            title: item.title,
+                            link: `https://fa.wikipedia.org/wiki/${encodeURIComponent(item.title)}`,
+                            snippet: item.snippet,
+                            source: "ویکی‌پدیا"
+                        }));
+                    } else {
+                        return [{
+                            title: `هیچ مقاله‌ای برای "${query}" یافت نشد`,
+                            link: `https://fa.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(query)}`,
+                            snippet: "می‌توانید با جستجوی عبارت در ویکی‌پدیا مقاله‌ای ایجاد کنید.",
+                            source: "ویکی‌پدیا"
+                        }];
+                    }
+                } catch (error) {
+                    console.error('Error fetching from Wikipedia:', error);
+                    return [{
+                        title: `جستجو برای "${query}"`,
+                        link: `https://fa.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(query)}`,
+                        snippet: "برای مشاهده نتایج کامل بر روی لینک کلیک کنید.",
+                        source: "ویکی‌پدیا"
+                    }];
                 }
-                
-                if (/(خستم|خسته|tired)/i.test(lowerMessage)) {
-                    return {
-                        type: 'emotion',
-                        response: "به نظر می‌رسه که خسته هستی. 😴 استراحت می‌تونه کمک کنه که شارژ بشی. می‌خوای دربارهش صحبت کنیم؟"
-                    };
-                }
-                
-                return {
-                    type: 'emotion',
-                    response: "متوجه احساست میشم. اگر دوست داری، می‌تونیم بیشتر دربارهش صحبت کنیم."
-                };
             }
         }
 
@@ -540,14 +1048,27 @@
         class ChatManager {
             constructor() {
                 this.nlp = new AdvancedNLP();
+                this.searchEngine = new SearchEngine();
+                this.settings = {
+                    userName: 'کاربر',
+                    chatMode: 'normal',
+                    responseLength: 'medium',
+                    searchEngine: 'duckduckgo',
+                    theme: 'light'
+                };
+                
                 this.setupEventListeners();
                 this.loadSettings();
+                this.applySettings();
             }
             
             setupEventListeners() {
                 const sendBtn = document.getElementById('sendBtn');
                 const userInput = document.getElementById('userInput');
                 const themeToggle = document.getElementById('themeToggle');
+                const settingsBtn = document.getElementById('settingsBtn');
+                const closeSettings = document.getElementById('closeSettings');
+                const overlay = document.getElementById('overlay');
                 
                 sendBtn.addEventListener('click', () => this.sendMessage());
                 userInput.addEventListener('keypress', (e) => {
@@ -555,6 +1076,45 @@
                 });
                 
                 themeToggle.addEventListener('click', () => this.toggleTheme());
+                
+                // مدیریت پنل تنظیمات
+                settingsBtn.addEventListener('click', () => this.toggleSettingsPanel(true));
+                closeSettings.addEventListener('click', () => this.toggleSettingsPanel(false));
+                overlay.addEventListener('click', () => this.toggleSettingsPanel(false));
+                
+                // پیشنهادات سریع
+                const suggestionChips = document.getElementById('suggestionChips');
+                suggestionChips.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('suggestion-chip')) {
+                        const query = e.target.getAttribute('data-query');
+                        document.getElementById('userInput').value = query;
+                        this.sendMessage();
+                    }
+                });
+                
+                // مدیریت تنظیمات
+                document.getElementById('userName').addEventListener('change', (e) => {
+                    this.settings.userName = e.target.value;
+                    this.saveSettings();
+                });
+                
+                document.getElementById('chatMode').addEventListener('change', (e) => {
+                    this.settings.chatMode = e.target.value;
+                    this.saveSettings();
+                });
+                
+                document.getElementById('responseLength').addEventListener('change', (e) => {
+                    this.settings.responseLength = e.target.value;
+                    this.saveSettings();
+                });
+                
+                document.getElementById('searchEngine').addEventListener('change', (e) => {
+                    this.settings.searchEngine = e.target.value;
+                    this.saveSettings();
+                });
+                
+                document.getElementById('clearHistoryBtn').addEventListener('click', () => this.clearHistory());
+                document.getElementById('resetSettingsBtn').addEventListener('click', () => this.resetSettings());
             }
             
             sendMessage() {
@@ -575,11 +1135,20 @@
                 }, 1000 + Math.random() * 1000);
             }
             
-            processMessage(message) {
+            async processMessage(message) {
                 const result = this.nlp.processMessage(message);
                 
                 if (result.type === 'math') {
                     this.addMathMessage(result.response, result.expression, result.result);
+                } else if (result.type === 'search') {
+                    this.addMessage(result.response, 'bot');
+                    this.showTypingIndicator();
+                    
+                    // انجام جستجو
+                    const searchResults = await this.searchEngine.search(result.query, this.settings.searchEngine);
+                    
+                    this.hideTypingIndicator();
+                    this.addSearchResults(searchResults, result.query);
                 } else {
                     this.addMessage(result.response, 'bot');
                 }
@@ -623,6 +1192,41 @@
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
             
+            addSearchResults(results, query) {
+                const chatContainer = document.getElementById('chatContainer');
+                const messageDiv = document.createElement('div');
+                
+                messageDiv.classList.add('message', 'search-message');
+                
+                let html = `<div>نتایج جستجو برای "<b>${query}</b>":</div>`;
+                html += `<div class="search-results">`;
+                
+                results.forEach((result, index) => {
+                    html += `
+                        <div class="search-result-item">
+                            <div class="search-result-title">${result.title}</div>
+                            <a href="${result.link}" target="_blank" class="search-result-link">${result.link}</a>
+                            <div class="search-result-snippet">${result.snippet}</div>
+                            <small>منبع: ${result.source}</small>
+                        </div>
+                    `;
+                });
+                
+                html += `</div>`;
+                
+                const messageText = document.createElement('div');
+                messageText.innerHTML = html;
+                messageDiv.appendChild(messageText);
+                
+                const messageTime = document.createElement('div');
+                messageTime.classList.add('message-time');
+                messageTime.textContent = new Date().toLocaleTimeString('fa-IR');
+                messageDiv.appendChild(messageTime);
+                
+                chatContainer.appendChild(messageDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
             showTypingIndicator() {
                 document.getElementById('typingIndicator').style.display = 'block';
             }
@@ -631,21 +1235,69 @@
                 document.getElementById('typingIndicator').style.display = 'none';
             }
             
+            toggleSettingsPanel(show) {
+                document.getElementById("settingsPanel").classList.toggle("active", show);
+                document.getElementById("overlay").classList.toggle("active", show);
+            }
+            
             toggleTheme() {
-                document.body.classList.toggle('dark-mode');
-                const themeToggle = document.getElementById('themeToggle');
-                themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+                this.settings.theme = this.settings.theme === "light" ? "dark" : "light";
+                this.applyTheme();
+                this.saveSettings();
+            }
+            
+            applyTheme() {
+                if (this.settings.theme === "dark") {
+                    document.body.classList.add("dark-mode");
+                    document.getElementById('themeToggle').textContent = '☀️';
+                } else {
+                    document.body.classList.remove("dark-mode");
+                    document.getElementById('themeToggle').textContent = '🌙';
+                }
+            }
+            
+            applySettings() {
+                // اعمال تنظیمات از localStorage
+                document.getElementById("userName").value = this.settings.userName;
+                document.getElementById("chatMode").value = this.settings.chatMode;
+                document.getElementById("responseLength").value = this.settings.responseLength;
+                document.getElementById("searchEngine").value = this.settings.searchEngine;
                 
-                // ذخیره تم در localStorage
-                localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+                this.applyTheme();
+            }
+            
+            saveSettings() {
+                localStorage.setItem('chatSettings', JSON.stringify(this.settings));
             }
             
             loadSettings() {
-                // بارگذاری تم از localStorage
-                const savedTheme = localStorage.getItem('theme');
-                if (savedTheme === 'dark') {
-                    document.body.classList.add('dark-mode');
-                    document.getElementById('themeToggle').textContent = '☀️';
+                const savedSettings = localStorage.getItem('chatSettings');
+                if (savedSettings) {
+                    this.settings = { ...this.settings, ...JSON.parse(savedSettings) };
+                }
+            }
+            
+            clearHistory() {
+                if (confirm('آیا از پاک کردن تاریخچه گفتگو مطمئن هستید؟')) {
+                    const chatContainer = document.getElementById('chatContainer');
+                    while (chatContainer.children.length > 1) {
+                        chatContainer.removeChild(chatContainer.lastChild);
+                    }
+                    this.nlp.context.conversationHistory = [];
+                }
+            }
+            
+            resetSettings() {
+                if (confirm('آیا از بازنشانی تنظیمات به حالت پیش‌فرض مطمئن هستید؟')) {
+                    this.settings = {
+                        userName: 'کاربر',
+                        chatMode: 'normal',
+                        responseLength: 'medium',
+                        searchEngine: 'duckduckgo',
+                        theme: 'light'
+                    };
+                    this.applySettings();
+                    this.saveSettings();
                 }
             }
         }
