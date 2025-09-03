@@ -16,6 +16,16 @@
             --card-bg: #ffffff;
             --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             --gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            --font-size-base: 1rem;
+        }
+
+        /* تم تیره */
+        body.dark-mode {
+            --light-bg: #1a1a1a;
+            --dark-text: #f8f9fa;
+            --light-text: #a0a0a0;
+            --card-bg: #2d2d2d;
+            --gradient: linear-gradient(135deg, #2a3a8f 0%, #3c22a5 100%);
         }
 
         * {
@@ -23,6 +33,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: var(--font-size-base);
         }
 
         body {
@@ -30,6 +41,15 @@
             color: var(--dark-text);
             min-height: 100vh;
             padding: 0;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #121212 0%, #2d2d2d 100%);
+        }
+
+        body.large-font {
+            --font-size-base: 1.2rem;
         }
 
         .container {
@@ -40,6 +60,7 @@
             background: var(--card-bg);
             position: relative;
             overflow: hidden;
+            transition: all 0.3s ease;
         }
 
         header {
@@ -99,6 +120,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            transition: all 0.3s ease;
         }
 
         .message {
@@ -144,10 +166,14 @@
 
         .message-content {
             background: var(--card-bg);
-            padding: 10px 14px;
-            border-radius: 18px;
+            padding: 12px 16px;
+            border-radius: 20px;
             box-shadow: var(--shadow);
             max-width: calc(100% - 60px);
+            word-break: break-word;
+            hyphens: auto;
+            line-height: 1.5;
+            transition: all 0.3s ease;
         }
 
         .user-message .message-content {
@@ -155,14 +181,22 @@
             border-top-right-radius: 5px;
         }
 
+        body.dark-mode .user-message .message-content {
+            background: #3a4a5d;
+        }
+
         .ai-message .message-content {
             background: white;
             border-top-left-radius: 5px;
         }
 
+        body.dark-mode .ai-message .message-content {
+            background: #3d3d3d;
+        }
+
         .message-text {
             margin-bottom: 4px;
-            line-height: 1.4;
+            line-height: 1.5;
             word-wrap: break-word;
         }
 
@@ -178,10 +212,15 @@
 
         .input-area {
             padding: 12px;
-            background: white;
+            background: var(--card-bg);
             border-top: 1px solid #eee;
             display: flex;
             align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .input-area {
+            border-top: 1px solid #333;
         }
 
         #user-input {
@@ -190,8 +229,15 @@
             border: 2px solid #e0e0e0;
             border-radius: 25px;
             outline: none;
-            font-size: 1rem;
-            transition: border-color 0.3s;
+            font-size: var(--font-size-base);
+            transition: border-color 0.3s, background 0.3s;
+            background: var(--card-bg);
+            color: var(--dark-text);
+        }
+
+        body.dark-mode #user-input {
+            border-color: #444;
+            background: #2d2d2d;
         }
 
         #user-input:focus {
@@ -221,11 +267,12 @@
         .typing-indicator {
             display: none;
             padding: 10px 15px;
-            background: white;
+            background: var(--card-bg);
             border-radius: 18px;
             box-shadow: var(--shadow);
             align-self: flex-start;
             margin-bottom: 10px;
+            transition: all 0.3s ease;
         }
 
         .typing-dots {
@@ -257,7 +304,7 @@
             right: -300px;
             width: 300px;
             height: 100%;
-            background: white;
+            background: var(--card-bg);
             box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
             z-index: 100;
             transition: right 0.3s ease;
@@ -276,6 +323,11 @@
             margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 1px solid #eee;
+            color: var(--dark-text);
+        }
+
+        body.dark-mode .menu-header {
+            border-bottom: 1px solid #333;
         }
 
         .menu-header h2 {
@@ -307,6 +359,11 @@
             align-items: center;
             padding: 10px 0;
             border-bottom: 1px solid #f0f0f0;
+            color: var(--dark-text);
+        }
+
+        body.dark-mode .setting-item {
+            border-bottom: 1px solid #333;
         }
 
         .setting-label {
@@ -366,10 +423,15 @@
             cursor: pointer;
             font-size: 0.9rem;
             transition: all 0.3s;
+            color: var(--dark-text);
         }
 
         .history-item:hover {
             background: #e9ecef;
+        }
+
+        body.dark-mode .history-item:hover {
+            background: #3d3d3d;
         }
 
         .history-date {
@@ -420,6 +482,10 @@
             border-radius: 10px;
         }
 
+        body.dark-mode .chat-box::-webkit-scrollbar-track {
+            background: #2d2d2d;
+        }
+
         .chat-box::-webkit-scrollbar-thumb {
             background: var(--primary-color);
             border-radius: 10px;
@@ -452,7 +518,7 @@
                         <i class="fas fa-robot"></i>
                     </div>
                     <div class="message-content">
-                        <div class="message-text">سلام! من یک هوش مصنوعی فارسی هستم. چگونه می‌توانم به شما کمک کنم؟</div>
+                        <div class="message-text">سلام! من یک هوش مصنوعی پیشرفته فارسی هستم. می‌توانم در مورد برنامه‌نویسی، ریاضیات، تاریخ، علم و خیلی چیزهای دیگر کمک کنم. چگونه می‌توانم به شما کمک کنم؟</div>
                         <div class="message-time">همین حالا</div>
                     </div>
                 </div>
@@ -547,8 +613,11 @@
 
     <div class="overlay" id="overlay"></div>
 
+    <!-- صدای اعلان -->
+    <audio id="notification-audio" src="https://www.soundjay.com/buttons/beep-07.mp3"></audio>
+
     <script>
-        // پایگاه داده دانش
+        // پایگاه داده دانش گسترش یافته برای هوش مصنوعی باهوش‌تر
         const knowledgeBase = {
             greetings: {
                 patterns: ["سلام", "درود", "سلامتی", "علیک", "hello", "hi", "صبح بخیر", "عصر بخیر", "شب بخیر"],
@@ -575,12 +644,8 @@
                 ]
             },
             math: {
-                patterns: ["محاسبه", "ریاضی", "جمع", "تفریق", "ضرب", "تقسیم", "بعلاوه", "منهای"],
-                responses: [
-                    "من در حل مسائل ریاضی می‌تونم کمکت کنم. بگو چه مسئله‌ای داری؟",
-                    "بیا این مسئله ریاضی رو با هم حل کنیم. مشکلت چیه؟",
-                    "ریاضیات یکی از نقاط قوت منه! بپرسم چه سوالی داری؟"
-                ]
+                patterns: ["محاسبه", "ریاضی", "جمع", "تفریق", "ضرب", "تقسیم", "بعلاوه", "منهای", "ریشه", "توان", "معادله"],
+                responses: [] // پاسخ‌ها در generateResponse مدیریت می‌شوند
             },
             time: {
                 patterns: ["ساعت", "زمان", "چند شب", "چند صبح", "امروز چندمه", "تاریخ"],
@@ -589,8 +654,107 @@
                     `امروز ${new Date().toLocaleDateString('fa-IR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} است.`,
                     `الان ${new Date().toLocaleTimeString('fa-IR')} و تاریخ امروز ${new Date().toLocaleDateString('fa-IR')} است.`
                 ]
+            },
+            programming: {
+                patterns: ["برنامه نویسی", "کد", "جاوا اسکریپت", "پایتون", "html", "css", "جاوا", "سی شارپ", "الگوریتم", "فانکشن", "متغیر", "حلقه"],
+                responses: [
+                    "در مورد برنامه‌نویسی می‌تونم کمک کنم! مثلاً برای نوشتن یک فانکشن ساده در جاوااسکریپت: function add(a, b) { return a + b; }",
+                    "اگر سوال خاصی در مورد کد داری، بگو تا راهنمایی کنم. مثلاً چطور یک آرایه رو سورت کنیم؟",
+                    "برنامه‌نویسی یکی از تخصص‌های منه! بپرس در مورد هر زبانی که می‌خوای، مثل پایتون: print('Hello World!')"
+                ]
+            },
+            history: {
+                patterns: ["تاریخ", "جنگ جهانی", "ایران باستان", "انقلاب", "شاه", "هخامنشیان"],
+                responses: [
+                    "تاریخ ایران باستان شامل سلسله‌هایی مثل هخامنشیان است که توسط کوروش کبیر تأسیس شد.",
+                    "جنگ جهانی دوم از ۱۹۳۹ تا ۱۹۴۵ طول کشید و بیش از ۷۰ میلیون نفر کشته شدند.",
+                    "در مورد چه دوره تاریخی می‌خوای بدونم؟"
+                ]
+            },
+            science: {
+                patterns: ["علم", "فیزیک", "شیمی", "زیست", "ستاره شناسی", "انرژی", "اتم", "ژنتیک"],
+                responses: [
+                    "در فیزیک، قانون نیوتن می‌گه F = m*a. جزئیات بیشتری می‌خوای؟",
+                    "شیمی عناصر جدول تناوبی رو بررسی می‌کنه، مثل هیدروژن که سبک‌ترین عنصر است.",
+                    "زیست‌شناسی به مطالعه زندگی می‌پردازه، مثل DNA که کد ژنتیکی ماست."
+                ]
+            },
+            weather: {
+                patterns: ["آب و هوا", "هوا", "باران", "برف", "دما"],
+                responses: [
+                    "متأسفانه دسترسی به داده‌های واقعی ندارم، اما می‌تونم بگم که در تهران معمولاً تابستون‌ها گرم است!",
+                    "برای پیش‌بینی دقیق، از اپ‌های هواشناسی استفاده کن، اما اگر سوال کلی داری بپرس."
+                ]
+            },
+            jokes: {
+                patterns: ["جوک", "لطیفه", "خنده", "بگو جوک"],
+                responses: [
+                    "چرا کامپیوترها سرما نمی‌خورن؟ چون ویندوز دارن! 😄",
+                    "یک ایرانی به هوش مصنوعی می‌گه: 'جوک بگو'، هوش می‌گه: 'زندگی!' 😂",
+                    "چرا کتاب ریاضی ناراحته؟ چون پر از مسئله است! 📚"
+                ]
+            },
+            advice: {
+                patterns: ["نصیحت", "راهنمایی", "مشاوره", "چطور", "چگونه"],
+                responses: [
+                    "برای موفقیت، همیشه یادگیری رو ادامه بده و اهداف کوچک تعیین کن.",
+                    "اگر در مورد زندگی مشاوره می‌خوای، بگو جزئیات تا بهتر کمک کنم.",
+                    "بهترین نصیحت: 'سلامت باش و شاد!' 🌟"
+                ]
             }
         };
+
+        // ذخیره‌سازی تنظیمات در localStorage
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('persianAI_settings')) || {};
+            document.getElementById('dark-mode').checked = settings.darkMode || false;
+            document.getElementById('large-font').checked = settings.largeFont || false;
+            document.getElementById('notification-sound').checked = settings.notificationSound !== false;
+            document.getElementById('vibration').checked = settings.vibration !== false;
+            document.getElementById('save-history').checked = settings.saveHistory !== false;
+
+            applyDarkMode();
+            applyLargeFont();
+        }
+
+        function saveSettings() {
+            const settings = {
+                darkMode: document.getElementById('dark-mode').checked,
+                largeFont: document.getElementById('large-font').checked,
+                notificationSound: document.getElementById('notification-sound').checked,
+                vibration: document.getElementById('vibration').checked,
+                saveHistory: document.getElementById('save-history').checked
+            };
+            localStorage.setItem('persianAI_settings', JSON.stringify(settings));
+        }
+
+        // اعمال تم تیره
+        function applyDarkMode() {
+            if (document.getElementById('dark-mode').checked) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+
+        // اعمال فونت بزرگتر
+        function applyLargeFont() {
+            if (document.getElementById('large-font').checked) {
+                document.body.classList.add('large-font');
+            } else {
+                document.body.classList.remove('large-font');
+            }
+        }
+
+        // پخش صدا و لرزش
+        function notify() {
+            if (document.getElementById('notification-sound').checked) {
+                document.getElementById('notification-audio').play();
+            }
+            if (document.getElementById('vibration').checked && 'vibrate' in navigator) {
+                navigator.vibrate(200);
+            }
+        }
 
         // ذخیره‌سازی تاریخچه گفتگو
         let chatHistory = [];
@@ -620,6 +784,11 @@
         const closeMenuButtons = document.querySelectorAll('.close-menu');
         const historyList = document.getElementById('history-list');
         const clearHistoryBtn = document.getElementById('clear-history-btn');
+        const darkModeToggle = document.getElementById('dark-mode');
+        const largeFontToggle = document.getElementById('large-font');
+        const notificationSoundToggle = document.getElementById('notification-sound');
+        const vibrationToggle = document.getElementById('vibration');
+        const saveHistoryToggle = document.getElementById('save-history');
 
         // نمایش تاریخچه گفتگو
         function renderChatHistory() {
@@ -634,7 +803,7 @@
                         <i class="fas fa-robot"></i>
                     </div>
                     <div class="message-content">
-                        <div class="message-text">سلام! من یک هوش مصنوعی فارسی هستم. چگونه می‌توانم به شما کمک کنم؟</div>
+                        <div class="message-text">سلام! من یک هوش مصنوعی پیشرفته فارسی هستم. می‌توانم در مورد برنامه‌نویسی، ریاضیات، تاریخ، علم و خیلی چیزهای دیگر کمک کنم. چگونه می‌توانم به شما کمک کنم؟</div>
                         <div class="message-time">همین حالا</div>
                     </div>
                 `;
@@ -652,6 +821,8 @@
 
         // ذخیره تاریخچه در localStorage
         function saveToHistory(message, sender) {
+            if (!document.getElementById('save-history').checked) return;
+
             const messageData = {
                 text: message,
                 sender: sender,
@@ -665,12 +836,20 @@
                 chatHistory.shift();
             }
             
-            // اضافه کردن session جدید به تاریخچه
-            chatHistory.push({
-                session: [...currentSession],
-                date: new Date().toLocaleDateString('fa-IR'),
-                id: Date.now()
-            });
+            // اضافه کردن session جدید به تاریخچه (اما فقط اگر جلسه جدید باشد)
+            if (sender === 'user' && currentSession.length === 1 || sender === 'ai') {
+                chatHistory[chatHistory.length - 1] = {
+                    session: [...currentSession],
+                    date: new Date().toLocaleDateString('fa-IR'),
+                    id: Date.now()
+                };
+            } else if (sender === 'user') {
+                chatHistory.push({
+                    session: [...currentSession],
+                    date: new Date().toLocaleDateString('fa-IR'),
+                    id: Date.now()
+                });
+            }
             
             try {
                 localStorage.setItem('persianAI_chatHistory', JSON.stringify(chatHistory));
@@ -749,13 +928,13 @@
             document.body.style.overflow = 'auto';
         }
 
-        // تشخیص قصد کاربر
+        // تشخیص قصد کاربر با دقت بیشتر
         function detectIntent(message) {
-            const lowerMessage = message.toLowerCase();
+            const lowerMessage = message.toLowerCase().replace(/[^\w\s]/gi, '');
             
             for (const [intent, data] of Object.entries(knowledgeBase)) {
                 for (const pattern of data.patterns) {
-                    if (lowerMessage.includes(pattern)) {
+                    if (lowerMessage.includes(pattern.toLowerCase())) {
                         return intent;
                     }
                 }
@@ -764,30 +943,42 @@
             return "unknown";
         }
 
-        // تولید پاسخ بر اساس قصد کاربر
+        // تولید پاسخ پیشرفته‌تر
         function generateResponse(intent, userMessage) {
-            if (knowledgeBase[intent]) {
+            if (knowledgeBase[intent] && knowledgeBase[intent].responses.length > 0) {
                 const responses = knowledgeBase[intent].responses;
                 return responses[Math.floor(Math.random() * responses.length)];
             }
             
-            // اگر سوال ریاضی است
-            if (userMessage.match(/\d+[\+\-\*\/]\d+/)) {
+            // مدیریت محاسبات ریاضی پیشرفته‌تر
+            if (intent === 'math' || userMessage.match(/[\d+\-*/^sqrt()]+/)) {
                 try {
-                    const result = eval(userMessage.replace(/[^\d\+\-\*\/\(\)\.]/g, ''));
-                    return `نتیجه محاسبه: ${result}`;
+                    let expr = userMessage.replace(/ریشه/g, 'Math.sqrt').replace(/توان/g, '**').replace(/[^0-9+\-*/^()sqrtMath. ]/g, '');
+                    const result = eval(expr);
+                    return `نتیجه محاسبه: ${result}. اگر معادله پیچیده‌تری داری، بگو تا حل کنم!`;
                 } catch (e) {
-                    return "متأسفم، نمی‌توانم این محاسبه را انجام دهم.";
+                    return "متأسفم، نمی‌توانم این محاسبه را انجام دهم. لطفاً فرمول را واضح‌تر بنویس.";
                 }
             }
             
-            // پاسخ پیش فرض
+            // مدیریت برنامه‌نویسی با مثال‌های بیشتر
+            if (intent === 'programming') {
+                if (userMessage.includes('جاوا اسکریپت')) {
+                    return "در جاوااسکریپت، برای ایجاد یک آرایه: let arr = [1, 2, 3]; و برای سورت: arr.sort(); سوال بیشتری داری؟";
+                } else if (userMessage.includes('پایتون')) {
+                    return "در پایتون، برای چاپ: print('سلام دنیا') و برای لیست: my_list = [1, 2, 3]. چه کد دیگه‌ای نیاز داری؟";
+                } else {
+                    return "برنامه‌نویسی رو دوست دارم! مثلاً الگوریتم جستجوی باینری رو می‌خوای توضیح بدم؟";
+                }
+            }
+            
+            // پاسخ پیش فرض هوشمندانه‌تر
             const responses = [
-                "جالب است! در این مورد بیشتر بگویید.",
-                "منظورتان را متوجه نشدم. می‌توانید clearer توضیح دهید؟",
-                "در این مورد اطلاعاتی دارم، اما شاید بتوانم با جستجو اطلاعات بیشتری پیدا کنم.",
-                "متأسفم، هنوز در حال یادگیری هستم و ممکن است نتوانم به همه سوالات پاسخ دهم.",
-                "این سوال جالبی است! می‌توانید کمی بیشتر توضیح دهید؟"
+                `جالب است! "${userMessage}" رو بررسی کردم، اما دقیق متوجه نشدم. می‌تونی جزئیات بیشتری بدی؟`,
+                "من در حال یادگیری‌ام و می‌تونم در مورد موضوعات مختلفی حرف بزنم. مثلاً در مورد علم، تاریخ یا حتی جوک! 😊",
+                "این سوال خوبیه! اگر در مورد برنامه‌نویسی، ریاضی یا هر چیز دیگه‌ای باشه، می‌تونم کمک کنم.",
+                "متأسفم اگر پاسخ کاملی ندارم، اما بیایم با هم فکر کنیم: چه جنبه‌ای از این موضوع مهمه؟",
+                "برای پاسخ دقیق‌تر، می‌تونم شبیه‌سازی کنم. مثلاً اگر سوال برنامه‌نویسی باشه، کد نمونه می‌دم!"
             ];
             
             return responses[Math.floor(Math.random() * responses.length)];
@@ -827,9 +1018,14 @@
             // اسکرول به پایین
             chatBox.scrollTop = chatBox.scrollHeight;
             
-            // ذخیره در تاریخچه
-            if (save && document.getElementById('save-history').checked) {
+            // ذخیره در تاریخچه اگر فعال باشد
+            if (save) {
                 saveToHistory(text, sender);
+            }
+
+            // پخش اعلان اگر پیام AI باشد
+            if (sender === 'ai') {
+                notify();
             }
         }
 
@@ -861,7 +1057,7 @@
             // نمایش نشانگر تایپ
             showTypingIndicator();
             
-            // تاخیر برای طبیعی‌تر شدن
+            // تاخیر برای طبیعی‌تر شدن (بین 1 تا 2 ثانیه)
             setTimeout(() => {
                 try {
                     // تشخیص قصد کاربر و تولید پاسخ
@@ -873,7 +1069,7 @@
                     displayMessage(response, 'ai');
                 } catch (error) {
                     hideTypingIndicator();
-                    displayMessage('متأسفانه در پردازش پیام شما خطایی رخ داده است.', 'ai');
+                    displayMessage('متأسفانه در پردازش پیام شما خطایی رخ داده است. لطفاً دوباره امتحان کنید.', 'ai');
                     console.error('Error:', error);
                 } finally {
                     // فعال کردن مجدد ورودی
@@ -881,17 +1077,33 @@
                     sendBtn.disabled = false;
                     userInput.focus();
                 }
-            }, 1500);
+            }, Math.random() * 1000 + 1000);
         }
 
         // مقداردهی اولیه
         function initialize() {
+            // بارگذاری تنظیمات
+            loadSettings();
+
             // رویدادهای کلیک
             historyBtn.addEventListener('click', () => openMenu(historyMenu));
             settingsBtn.addEventListener('click', () => openMenu(settingsMenu));
             overlay.addEventListener('click', closeMenus);
             closeMenuButtons.forEach(btn => btn.addEventListener('click', closeMenus));
             clearHistoryBtn.addEventListener('click', clearHistory);
+
+            // رویدادهای تنظیمات
+            darkModeToggle.addEventListener('change', () => {
+                applyDarkMode();
+                saveSettings();
+            });
+            largeFontToggle.addEventListener('change', () => {
+                applyLargeFont();
+                saveSettings();
+            });
+            notificationSoundToggle.addEventListener('change', saveSettings);
+            vibrationToggle.addEventListener('change', saveSettings);
+            saveHistoryToggle.addEventListener('change', saveSettings);
 
             // امکان ارسال با کلید Enter
             userInput.addEventListener('keypress', function(e) {
