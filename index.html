@@ -573,12 +573,39 @@
                     "قابل نداشت! همیشه خوشحال می‌شم کمکت کنم.",
                     "خواهش می‌کنم! برای من افتخاره که می‌تونم کمکتون کنم."
                 ]
+            },
+            math: {
+                patterns: ["محاسبه", "ریاضی", "جمع", "تفریق", "ضرب", "تقسیم", "بعلاوه", "منهای"],
+                responses: [
+                    "من در حل مسائل ریاضی می‌تونم کمکت کنم. بگو چه مسئله‌ای داری؟",
+                    "بیا این مسئله ریاضی رو با هم حل کنیم. مشکلت چیه؟",
+                    "ریاضیات یکی از نقاط قوت منه! بپرسم چه سوالی داری؟"
+                ]
+            },
+            time: {
+                patterns: ["ساعت", "زمان", "چند شب", "چند صبح", "امروز چندمه", "تاریخ"],
+                responses: [
+                    `هم اکنون ساعت ${new Date().toLocaleTimeString('fa-IR')} است.`,
+                    `امروز ${new Date().toLocaleDateString('fa-IR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} است.`,
+                    `الان ${new Date().toLocaleTimeString('fa-IR')} و تاریخ امروز ${new Date().toLocaleDateString('fa-IR')} است.`
+                ]
             }
         };
 
         // ذخیره‌سازی تاریخچه گفتگو
-        let chatHistory = JSON.parse(localStorage.getItem('persianAI_chatHistory')) || [];
+        let chatHistory = [];
         let currentSession = [];
+
+        // بارگذاری تاریخچه از localStorage
+        try {
+            const savedHistory = localStorage.getItem('persianAI_chatHistory');
+            if (savedHistory) {
+                chatHistory = JSON.parse(savedHistory);
+            }
+        } catch (e) {
+            console.error('خطا در بارگذاری تاریخچه:', e);
+            chatHistory = [];
+        }
 
         // عناصر DOM
         const chatBox = document.getElementById('chat-box');
@@ -597,6 +624,23 @@
         // نمایش تاریخچه گفتگو
         function renderChatHistory() {
             chatBox.innerHTML = '';
+            
+            // اضافه کردن پیام خوشامدگویی اگر تاریخچه خالی است
+            if (currentSession.length === 0) {
+                const welcomeMsg = document.createElement('div');
+                welcomeMsg.className = 'message ai-message';
+                welcomeMsg.innerHTML = `
+                    <div class="avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-text">سلام! من یک هوش مصنوعی فارسی هستم. چگونه می‌توانم به شما کمک کنم؟</div>
+                        <div class="message-time">همین حالا</div>
+                    </div>
+                `;
+                chatBox.appendChild(welcomeMsg);
+                return;
+            }
             
             currentSession.forEach(msg => {
                 displayMessage(msg.text, msg.sender, msg.time, false);
@@ -621,13 +665,19 @@
                 chatHistory.shift();
             }
             
+            // اضافه کردن session جدید به تاریخچه
             chatHistory.push({
-                session: currentSession,
-                date: new Date().toLocaleDateString('fa-IR')
+                session: [...currentSession],
+                date: new Date().toLocaleDateString('fa-IR'),
+                id: Date.now()
             });
             
-            localStorage.setItem('persianAI_chatHistory', JSON.stringify(chatHistory));
-            renderHistoryList();
+            try {
+                localStorage.setItem('persianAI_chatHistory', JSON.stringify(chatHistory));
+                renderHistoryList();
+            } catch (e) {
+                console.error('خطا در ذخیره تاریخچه:', e);
+            }
         }
 
         // نمایش لیست تاریخچه
@@ -635,11 +685,12 @@
             historyList.innerHTML = '';
             
             if (chatHistory.length === 0) {
-                historyList.innerHTML = '<p style="text-align: center; color: var(--light-text);">هیچ تاریخچه‌ای موجود نیست</p>';
+                historyList.innerHTML = '<p style="text-align: center; color: var(--light-text); padding: 20px;">هیچ تاریخچه‌ای موجود نیست</p>';
                 return;
             }
             
-            chatHistory.forEach((session, index) => {
+            // نمایش تاریخچه به صورت معکوس (جدیدترین اول)
+            [...chatHistory].reverse().forEach((session, index) => {
                 const firstMessage = session.session[0]?.text || 'گفتگو جدید';
                 const historyItem = document.createElement('div');
                 historyItem.className = 'history-item';
@@ -648,7 +699,7 @@
                     <div class="history-date">${session.date}</div>
                 `;
                 historyItem.addEventListener('click', () => {
-                    loadHistorySession(index);
+                    loadHistorySession(chatHistory.length - 1 - index);
                     closeMenus();
                 });
                 historyList.appendChild(historyItem);
@@ -657,8 +708,10 @@
 
         // بارگذاری یک session از تاریخچه
         function loadHistorySession(index) {
-            currentSession = [...chatHistory[index].session];
-            renderChatHistory();
+            if (index >= 0 && index < chatHistory.length) {
+                currentSession = [...chatHistory[index].session];
+                renderChatHistory();
+            }
         }
 
         // پاک کردن تاریخچه
@@ -666,14 +719,13 @@
             if (confirm('آیا از پاک کردن همه تاریخچه گفتگو مطمئن هستید؟')) {
                 chatHistory = [];
                 currentSession = [];
-                localStorage.removeItem('persianAI_chatHistory');
+                try {
+                    localStorage.removeItem('persianAI_chatHistory');
+                } catch (e) {
+                    console.error('خطا در پاک کردن تاریخچه:', e);
+                }
                 renderHistoryList();
                 renderChatHistory();
-                
-                // نمایش پیام خوشامدگویی
-                setTimeout(() => {
-                    displayMessage('سلام! مجدداً خوش آمدید. چگونه می‌توانم کمک کنم؟', 'ai');
-                }, 500);
             }
         }
 
@@ -682,6 +734,11 @@
             menu.classList.add('active');
             overlay.classList.add('active');
             document.body.style.overflow = 'hidden';
+            
+            // اگر منوی تاریخچه است، لیست را رندر کن
+            if (menu.id === 'history-menu') {
+                renderHistoryList();
+            }
         }
 
         // بستن منوها
@@ -708,10 +765,20 @@
         }
 
         // تولید پاسخ بر اساس قصد کاربر
-        function generateResponse(intent) {
+        function generateResponse(intent, userMessage) {
             if (knowledgeBase[intent]) {
                 const responses = knowledgeBase[intent].responses;
                 return responses[Math.floor(Math.random() * responses.length)];
+            }
+            
+            // اگر سوال ریاضی است
+            if (userMessage.match(/\d+[\+\-\*\/]\d+/)) {
+                try {
+                    const result = eval(userMessage.replace(/[^\d\+\-\*\/\(\)\.]/g, ''));
+                    return `نتیجه محاسبه: ${result}`;
+                } catch (e) {
+                    return "متأسفم، نمی‌توانم این محاسبه را انجام دهم.";
+                }
             }
             
             // پاسخ پیش فرض
@@ -719,7 +786,8 @@
                 "جالب است! در این مورد بیشتر بگویید.",
                 "منظورتان را متوجه نشدم. می‌توانید clearer توضیح دهید؟",
                 "در این مورد اطلاعاتی دارم، اما شاید بتوانم با جستجو اطلاعات بیشتری پیدا کنم.",
-                "متأسفم، هنوز در حال یادگیری هستم و ممکن است نتوانم به همه سوالات پاسخ دهم."
+                "متأسفم، هنوز در حال یادگیری هستم و ممکن است نتوانم به همه سوالات پاسخ دهم.",
+                "این سوال جالبی است! می‌توانید کمی بیشتر توضیح دهید؟"
             ];
             
             return responses[Math.floor(Math.random() * responses.length)];
@@ -760,7 +828,7 @@
             chatBox.scrollTop = chatBox.scrollHeight;
             
             // ذخیره در تاریخچه
-            if (save) {
+            if (save && document.getElementById('save-history').checked) {
                 saveToHistory(text, sender);
             }
         }
@@ -795,40 +863,58 @@
             
             // تاخیر برای طبیعی‌تر شدن
             setTimeout(() => {
-                // تشخیص قصد کاربر و تولید پاسخ
-                const intent = detectIntent(message);
-                const response = generateResponse(intent);
-                
-                // پنهان کردن نشانگر تایپ و نمایش پاسخ
-                hideTypingIndicator();
-                displayMessage(response, 'ai');
-                
-                // فعال کردن مجدد ورودی
-                userInput.disabled = false;
-                sendBtn.disabled = false;
-                userInput.focus();
+                try {
+                    // تشخیص قصد کاربر و تولید پاسخ
+                    const intent = detectIntent(message);
+                    const response = generateResponse(intent, message);
+                    
+                    // پنهان کردن نشانگر تایپ و نمایش پاسخ
+                    hideTypingIndicator();
+                    displayMessage(response, 'ai');
+                } catch (error) {
+                    hideTypingIndicator();
+                    displayMessage('متأسفانه در پردازش پیام شما خطایی رخ داده است.', 'ai');
+                    console.error('Error:', error);
+                } finally {
+                    // فعال کردن مجدد ورودی
+                    userInput.disabled = false;
+                    sendBtn.disabled = false;
+                    userInput.focus();
+                }
             }, 1500);
         }
 
-        // رویدادهای کلیک
-        historyBtn.addEventListener('click', () => openMenu(historyMenu));
-        settingsBtn.addEventListener('click', () => openMenu(settingsMenu));
-        overlay.addEventListener('click', closeMenus);
-        closeMenuButtons.forEach(btn => btn.addEventListener('click', closeMenus));
-        clearHistoryBtn.addEventListener('click', clearHistory);
-
-        // امکان ارسال با کلید Enter
-        userInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-
         // مقداردهی اولیه
-        window.onload = function() {
+        function initialize() {
+            // رویدادهای کلیک
+            historyBtn.addEventListener('click', () => openMenu(historyMenu));
+            settingsBtn.addEventListener('click', () => openMenu(settingsMenu));
+            overlay.addEventListener('click', closeMenus);
+            closeMenuButtons.forEach(btn => btn.addEventListener('click', closeMenus));
+            clearHistoryBtn.addEventListener('click', clearHistory);
+
+            // امکان ارسال با کلید Enter
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            // رویداد کلیک برای دکمه ارسال
+            sendBtn.addEventListener('click', sendMessage);
+
+            // بارگذاری اولیه
+            renderChatHistory();
             renderHistoryList();
             userInput.focus();
-        };
+        }
+
+        // شروع برنامه زمانی که DOM کاملاً لود شده
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initialize);
+        } else {
+            initialize();
+        }
     </script>
 </body>
 </html>
