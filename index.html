@@ -19,7 +19,6 @@
             --font-size-base: 1rem;
         }
 
-        /* تم تیره */
         body.dark-mode {
             --light-bg: #1a1a1a;
             --dark-text: #f8f9fa;
@@ -297,7 +296,6 @@
             30% { transform: translateY(-5px); }
         }
 
-        /* منوهای کناری */
         .side-menu {
             position: fixed;
             top: 0;
@@ -455,7 +453,6 @@
             display: block;
         }
 
-        /* ریسپانسیو برای تبلت */
         @media (min-width: 768px) {
             .container {
                 max-width: 500px;
@@ -472,7 +469,6 @@
             }
         }
 
-        /* اسکرول بار سفارشی */
         .chat-box::-webkit-scrollbar {
             width: 5px;
         }
@@ -513,16 +509,6 @@
 
         <div class="chat-container">
             <div class="chat-box" id="chat-box">
-                <div class="message ai-message">
-                    <div class="avatar">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <div class="message-content">
-                        <div class="message-text">سلام! من یک هوش مصنوعی پیشرفته فارسی هستم. می‌توانم در مورد برنامه‌نویسی، ریاضیات، تاریخ، علم و خیلی چیزهای دیگر کمک کنم. چگونه می‌توانم به شما کمک کنم؟</div>
-                        <div class="message-time">همین حالا</div>
-                    </div>
-                </div>
-                
                 <div class="typing-indicator" id="typing-indicator">
                     <div class="typing-dots">
                         <div class="typing-dot"></div>
@@ -541,20 +527,16 @@
         </div>
     </div>
 
-    <!-- منوی تاریخچه -->
     <div class="side-menu" id="history-menu">
         <div class="menu-header">
             <h2>تاریخچه گفتگو</h2>
             <button class="close-menu">&times;</button>
         </div>
         <div class="menu-section">
-            <div id="history-list">
-                <!-- آیتم‌های تاریخچه اینجا نمایش داده می‌شوند -->
-            </div>
+            <div id="history-list"></div>
         </div>
     </div>
 
-    <!-- منوی تنظیمات -->
     <div class="side-menu" id="settings-menu">
         <div class="menu-header">
             <h2>تنظیمات</h2>
@@ -613,519 +595,346 @@
 
     <div class="overlay" id="overlay"></div>
 
-    <!-- صدای اعلان -->
     <audio id="notification-audio" src="https://www.soundjay.com/buttons/beep-07.mp3"></audio>
 
     <script>
-        // پایگاه داده دانش گسترش یافته برای هوش مصنوعی باهوش‌تر
+        // پایگاه داده دانش
         const knowledgeBase = {
-            greetings: {
-                patterns: ["سلام", "درود", "سلامتی", "علیک", "hello", "hi", "صبح بخیر", "عصر بخیر", "شب بخیر"],
-                responses: [
-                    "سلام! چطور می‌تونم کمک تون کنم؟ 😊",
-                    "درود بر شما! چه کمکی از دستم برمیاد؟",
-                    "سلام! خوشحالم که باهات گفتگو می‌کنم. امروز چه سوالی داری؟"
-                ]
-            },
-            farewells: {
-                patterns: ["خداحافظ", "بای", "خدانگهدار", "goodbye", "bye", "فعلا", "بدرود"],
-                responses: [
-                    "خداحافظ! امیدوارم باز هم ببینمت. 🌸",
-                    "بدرود! همیشه در خدمت شما هستم.",
-                    "خدانگهدار! روز خوبی داشته باشید. ☀️"
-                ]
-            },
-            thanks: {
-                patterns: ["ممنون", "متشکرم", "مرسی", "thanks", "thank you", "دست مریزاد"],
-                responses: [
-                    "خواهش می‌کنم! خوشحالم که تونستم کمک کنم. 😊",
-                    "قابل نداشت! همیشه خوشحال می‌شم کمکت کنم.",
-                    "خواهش می‌کنم! برای من افتخاره که می‌تونم کمکتون کنم."
-                ]
-            },
-            math: {
-                patterns: ["محاسبه", "ریاضی", "جمع", "تفریق", "ضرب", "تقسیم", "بعلاوه", "منهای", "ریشه", "توان", "معادله"],
-                responses: [] // پاسخ‌ها در generateResponse مدیریت می‌شوند
-            },
-            time: {
-                patterns: ["ساعت", "زمان", "چند شب", "چند صبح", "امروز چندمه", "تاریخ"],
-                responses: [
-                    `هم اکنون ساعت ${new Date().toLocaleTimeString('fa-IR')} است.`,
-                    `امروز ${new Date().toLocaleDateString('fa-IR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} است.`,
-                    `الان ${new Date().toLocaleTimeString('fa-IR')} و تاریخ امروز ${new Date().toLocaleDateString('fa-IR')} است.`
-                ]
-            },
-            programming: {
-                patterns: ["برنامه نویسی", "کد", "جاوا اسکریپت", "پایتون", "html", "css", "جاوا", "سی شارپ", "الگوریتم", "فانکشن", "متغیر", "حلقه"],
-                responses: [
-                    "در مورد برنامه‌نویسی می‌تونم کمک کنم! مثلاً برای نوشتن یک فانکشن ساده در جاوااسکریپت: function add(a, b) { return a + b; }",
-                    "اگر سوال خاصی در مورد کد داری، بگو تا راهنمایی کنم. مثلاً چطور یک آرایه رو سورت کنیم؟",
-                    "برنامه‌نویسی یکی از تخصص‌های منه! بپرس در مورد هر زبانی که می‌خوای، مثل پایتون: print('Hello World!')"
-                ]
-            },
-            history: {
-                patterns: ["تاریخ", "جنگ جهانی", "ایران باستان", "انقلاب", "شاه", "هخامنشیان"],
-                responses: [
-                    "تاریخ ایران باستان شامل سلسله‌هایی مثل هخامنشیان است که توسط کوروش کبیر تأسیس شد.",
-                    "جنگ جهانی دوم از ۱۹۳۹ تا ۱۹۴۵ طول کشید و بیش از ۷۰ میلیون نفر کشته شدند.",
-                    "در مورد چه دوره تاریخی می‌خوای بدونم؟"
-                ]
-            },
-            science: {
-                patterns: ["علم", "فیزیک", "شیمی", "زیست", "ستاره شناسی", "انرژی", "اتم", "ژنتیک"],
-                responses: [
-                    "در فیزیک، قانون نیوتن می‌گه F = m*a. جزئیات بیشتری می‌خوای؟",
-                    "شیمی عناصر جدول تناوبی رو بررسی می‌کنه، مثل هیدروژن که سبک‌ترین عنصر است.",
-                    "زیست‌شناسی به مطالعه زندگی می‌پردازه، مثل DNA که کد ژنتیکی ماست."
-                ]
-            },
-            weather: {
-                patterns: ["آب و هوا", "هوا", "باران", "برف", "دما"],
-                responses: [
-                    "متأسفانه دسترسی به داده‌های واقعی ندارم، اما می‌تونم بگم که در تهران معمولاً تابستون‌ها گرم است!",
-                    "برای پیش‌بینی دقیق، از اپ‌های هواشناسی استفاده کن، اما اگر سوال کلی داری بپرس."
-                ]
-            },
-            jokes: {
-                patterns: ["جوک", "لطیفه", "خنده", "بگو جوک"],
-                responses: [
-                    "چرا کامپیوترها سرما نمی‌خورن؟ چون ویندوز دارن! 😄",
-                    "یک ایرانی به هوش مصنوعی می‌گه: 'جوک بگو'، هوش می‌گه: 'زندگی!' 😂",
-                    "چرا کتاب ریاضی ناراحته؟ چون پر از مسئله است! 📚"
-                ]
-            },
-            advice: {
-                patterns: ["نصیحت", "راهنمایی", "مشاوره", "چطور", "چگونه"],
-                responses: [
-                    "برای موفقیت، همیشه یادگیری رو ادامه بده و اهداف کوچک تعیین کن.",
-                    "اگر در مورد زندگی مشاوره می‌خوای، بگو جزئیات تا بهتر کمک کنم.",
-                    "بهترین نصیحت: 'سلامت باش و شاد!' 🌟"
-                ]
-            }
+            greetings: { patterns: ["سلام", "درود", "hello", "hi", "صبح بخیر", "عصر بخیر"], responses: ["سلام! چطور می‌تونم کمک‌تون کنم؟ 😊", "درود بر شما! چه کمکی از دستم برمیاد؟", "سلام! خوشحالم که باهات گفتگو می‌کنم. امروز چه سوالی داری؟"] },
+            farewells: { patterns: ["خداحافظ", "بای", "خدانگهدار", "goodbye", "bye", "فعلا", "بدرود"], responses: ["خداحافظ! امیدوارم باز هم ببینمت. 🌸", "بدرود! همیشه در خدمت شما هستم.", "خدانگهدار! روز خوبی داشته باشید. ☀️"] },
+            thanks: { patterns: ["ممنون", "متشکرم", "مرسی", "thanks", "thank you", "دست مریزاد"], responses: ["خواهش می‌کنم! خوشحالم که تونستم کمک کنم. 😊", "قابل نداشت! همیشه خوشحال می‌شم کمکت کنم.", "خواهش می‌کنم! برای من افتخاره که می‌تونم کمکتون کنم."] },
+            math: { patterns: ["محاسبه", "ریاضی", "جمع", "تفریق", "ضرب", "تقسیم", "ریشه", "توان", "بعلاوه", "منهای"], responses: [] },
+            time: { patterns: ["ساعت", "زمان", "چند شب", "چند صبح", "امروز چندمه", "تاریخ"], responses: [] },
+            programming: { patterns: ["برنامه نویسی", "کد", "جاوا اسکریپت", "پایتون", "html", "css", "جاوا", "سی شارپ", "الگوریتم"], responses: ["برنامه‌نویسی یکی از تخصص‌های منه! بگو در مورد چه زبانی سوال داری؟", "اگر سوال خاصی در مورد کد داری، بگو تا راهنمایی کنم."] },
+            science: { patterns: ["علم", "فیزیک", "شیمی", "زیست", "ستاره شناسی", "انرژی", "اتم", "ژنتیک", "قانون دوم نیوتون"], responses: ["در فیزیک، قانون نیوتن می‌گه F = m*a. جزئیات بیشتری می‌خوای؟", "شیمی عناصر جدول تناوبی رو بررسی می‌کنه، مثل هیدروژن که سبک‌ترین عنصر است.", "زیست‌شناسی به مطالعه زندگی می‌پردازه، مثل DNA که کد ژنتیکی ماست."] },
+            jokes: { patterns: ["جوک", "لطیفه", "خنده", "بگو جوک"], responses: ["چرا کامپیوترها سرما نمی‌خورن؟ چون ویندوز دارن! 😂", "یک ایرانی به هوش مصنوعی می‌گه: 'جوک بگو'، هوش می‌گه: 'زندگی!' 😂", "چرا کتاب ریاضی ناراحته؟ چون پر از مسئله است! 📚"] },
+            default: { patterns: [], responses: ["متوجه منظورتون نشدم. می‌تونی واضح‌تر بگی؟", "من یک هوش مصنوعی هستم. در مورد برنامه‌نویسی، ریاضی یا تاریخ سوال بپرس!"] }
         };
 
-        // ذخیره‌سازی تنظیمات در localStorage
-        function loadSettings() {
-            const settings = JSON.parse(localStorage.getItem('persianAI_settings')) || {};
-            document.getElementById('dark-mode').checked = settings.darkMode || false;
-            document.getElementById('large-font').checked = settings.largeFont || false;
-            document.getElementById('notification-sound').checked = settings.notificationSound !== false;
-            document.getElementById('vibration').checked = settings.vibration !== false;
-            document.getElementById('save-history').checked = settings.saveHistory !== false;
+        const DOMElements = {
+            chatBox: document.getElementById('chat-box'),
+            userInput: document.getElementById('user-input'),
+            sendBtn: document.getElementById('send-btn'),
+            typingIndicator: document.getElementById('typing-indicator'),
+            historyBtn: document.getElementById('history-btn'),
+            settingsBtn: document.getElementById('settings-btn'),
+            historyMenu: document.getElementById('history-menu'),
+            settingsMenu: document.getElementById('settings-menu'),
+            overlay: document.getElementById('overlay'),
+            closeMenuButtons: document.querySelectorAll('.close-menu'),
+            historyList: document.getElementById('history-list'),
+            clearHistoryBtn: document.getElementById('clear-history-btn'),
+            darkModeToggle: document.getElementById('dark-mode'),
+            largeFontToggle: document.getElementById('large-font'),
+            notificationSoundToggle: document.getElementById('notification-sound'),
+            vibrationToggle: document.getElementById('vibration'),
+            saveHistoryToggle: document.getElementById('save-history'),
+            notificationAudio: document.getElementById('notification-audio')
+        };
 
-            applyDarkMode();
-            applyLargeFont();
-        }
+        let chatHistory = JSON.parse(localStorage.getItem('persianAI_chatHistory')) || [];
+        let currentSessionId = null;
 
+        const WELCOME_MESSAGE = {
+            text: "سلام! من یک هوش مصنوعی پیشرفته فارسی هستم. چگونه می‌توانم به شما کمک کنم؟",
+            sender: "ai",
+            time: "همین حالا"
+        };
+
+        // --- مدیریت تنظیمات ---
         function saveSettings() {
             const settings = {
-                darkMode: document.getElementById('dark-mode').checked,
-                largeFont: document.getElementById('large-font').checked,
-                notificationSound: document.getElementById('notification-sound').checked,
-                vibration: document.getElementById('vibration').checked,
-                saveHistory: document.getElementById('save-history').checked
+                darkMode: DOMElements.darkModeToggle.checked,
+                largeFont: DOMElements.largeFontToggle.checked,
+                notificationSound: DOMElements.notificationSoundToggle.checked,
+                vibration: DOMElements.vibrationToggle.checked,
+                saveHistory: DOMElements.saveHistoryToggle.checked
             };
             localStorage.setItem('persianAI_settings', JSON.stringify(settings));
         }
 
-        // اعمال تم تیره
-        function applyDarkMode() {
-            if (document.getElementById('dark-mode').checked) {
-                document.body.classList.add('dark-mode');
-            } else {
-                document.body.classList.remove('dark-mode');
-            }
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('persianAI_settings')) || {};
+            DOMElements.darkModeToggle.checked = settings.darkMode || false;
+            DOMElements.largeFontToggle.checked = settings.largeFont || false;
+            DOMElements.notificationSoundToggle.checked = settings.notificationSound !== false;
+            DOMElements.vibrationToggle.checked = settings.vibration !== false;
+            DOMElements.saveHistoryToggle.checked = settings.saveHistory !== false;
+            applyTheme();
         }
 
-        // اعمال فونت بزرگتر
-        function applyLargeFont() {
-            if (document.getElementById('large-font').checked) {
-                document.body.classList.add('large-font');
-            } else {
-                document.body.classList.remove('large-font');
-            }
+        function applyTheme() {
+            document.body.classList.toggle('dark-mode', DOMElements.darkModeToggle.checked);
+            document.body.classList.toggle('large-font', DOMElements.largeFontToggle.checked);
         }
 
-        // پخش صدا و لرزش
-        function notify() {
-            if (document.getElementById('notification-sound').checked) {
-                document.getElementById('notification-audio').play();
-            }
-            if (document.getElementById('vibration').checked && 'vibrate' in navigator) {
-                navigator.vibrate(200);
-            }
-        }
-
-        // ذخیره‌سازی تاریخچه گفتگو
-        let chatHistory = [];
-        let currentSession = [];
-
-        // بارگذاری تاریخچه از localStorage
-        try {
-            const savedHistory = localStorage.getItem('persianAI_chatHistory');
-            if (savedHistory) {
-                chatHistory = JSON.parse(savedHistory);
-            }
-        } catch (e) {
-            console.error('خطا در بارگذاری تاریخچه:', e);
-            chatHistory = [];
-        }
-
-        // عناصر DOM
-        const chatBox = document.getElementById('chat-box');
-        const userInput = document.getElementById('user-input');
-        const sendBtn = document.getElementById('send-btn');
-        const typingIndicator = document.getElementById('typing-indicator');
-        const historyBtn = document.getElementById('history-btn');
-        const settingsBtn = document.getElementById('settings-btn');
-        const historyMenu = document.getElementById('history-menu');
-        const settingsMenu = document.getElementById('settings-menu');
-        const overlay = document.getElementById('overlay');
-        const closeMenuButtons = document.querySelectorAll('.close-menu');
-        const historyList = document.getElementById('history-list');
-        const clearHistoryBtn = document.getElementById('clear-history-btn');
-        const darkModeToggle = document.getElementById('dark-mode');
-        const largeFontToggle = document.getElementById('large-font');
-        const notificationSoundToggle = document.getElementById('notification-sound');
-        const vibrationToggle = document.getElementById('vibration');
-        const saveHistoryToggle = document.getElementById('save-history');
-
-        // نمایش تاریخچه گفتگو
-        function renderChatHistory() {
-            chatBox.innerHTML = '';
-            
-            // اضافه کردن پیام خوشامدگویی اگر تاریخچه خالی است
-            if (currentSession.length === 0) {
-                const welcomeMsg = document.createElement('div');
-                welcomeMsg.className = 'message ai-message';
-                welcomeMsg.innerHTML = `
-                    <div class="avatar">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <div class="message-content">
-                        <div class="message-text">سلام! من یک هوش مصنوعی پیشرفته فارسی هستم. می‌توانم در مورد برنامه‌نویسی، ریاضیات، تاریخ، علم و خیلی چیزهای دیگر کمک کنم. چگونه می‌توانم به شما کمک کنم؟</div>
-                        <div class="message-time">همین حالا</div>
-                    </div>
-                `;
-                chatBox.appendChild(welcomeMsg);
-                return;
-            }
-            
-            currentSession.forEach(msg => {
-                displayMessage(msg.text, msg.sender, msg.time, false);
-            });
-            
-            // اسکرول به پایین
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        // ذخیره تاریخچه در localStorage
+        // --- مدیریت تاریخچه ---
         function saveToHistory(message, sender) {
-            if (!document.getElementById('save-history').checked) return;
+            if (!DOMElements.saveHistoryToggle.checked) return;
 
-            const messageData = {
-                text: message,
-                sender: sender,
-                time: new Date().toLocaleTimeString('fa-IR')
-            };
-            
-            currentSession.push(messageData);
-            
-            // فقط ۱۰ تا از آخرین گفتگوها را نگه دار
-            if (chatHistory.length >= 10) {
-                chatHistory.shift();
+            const messageData = { text: message, sender: sender, time: new Date().toLocaleTimeString('fa-IR') };
+
+            if (!currentSessionId || chatHistory.length === 0 || chatHistory[chatHistory.length - 1].id !== currentSessionId) {
+                const newSession = { id: Date.now(), messages: [messageData], date: new Date().toLocaleDateString('fa-IR') };
+                chatHistory.push(newSession);
+                currentSessionId = newSession.id;
+            } else {
+                const session = chatHistory.find(s => s.id === currentSessionId);
+                if (session) session.messages.push(messageData);
             }
-            
-            // اضافه کردن session جدید به تاریخچه (اما فقط اگر جلسه جدید باشد)
-            if (sender === 'user' && currentSession.length === 1 || sender === 'ai') {
-                chatHistory[chatHistory.length - 1] = {
-                    session: [...currentSession],
-                    date: new Date().toLocaleDateString('fa-IR'),
-                    id: Date.now()
-                };
-            } else if (sender === 'user') {
-                chatHistory.push({
-                    session: [...currentSession],
-                    date: new Date().toLocaleDateString('fa-IR'),
-                    id: Date.now()
-                });
-            }
-            
+
             try {
                 localStorage.setItem('persianAI_chatHistory', JSON.stringify(chatHistory));
-                renderHistoryList();
             } catch (e) {
-                console.error('خطا در ذخیره تاریخچه:', e);
+                console.error('Error saving history:', e);
             }
         }
 
-        // نمایش لیست تاریخچه
         function renderHistoryList() {
-            historyList.innerHTML = '';
-            
-            if (chatHistory.length === 0) {
-                historyList.innerHTML = '<p style="text-align: center; color: var(--light-text); padding: 20px;">هیچ تاریخچه‌ای موجود نیست</p>';
+            DOMElements.historyList.innerHTML = '';
+            const historyToRender = [...chatHistory].reverse();
+
+            if (historyToRender.length === 0) {
+                DOMElements.historyList.innerHTML = '<p style="text-align: center; color: var(--light-text); padding: 20px;">هیچ تاریخچه‌ای موجود نیست</p>';
                 return;
             }
             
-            // نمایش تاریخچه به صورت معکوس (جدیدترین اول)
-            [...chatHistory].reverse().forEach((session, index) => {
-                const firstMessage = session.session[0]?.text || 'گفتگو جدید';
+            historyToRender.forEach(session => {
+                const firstMessage = session.messages[0]?.text || 'گفتگوی جدید';
                 const historyItem = document.createElement('div');
                 historyItem.className = 'history-item';
-                historyItem.innerHTML = `
-                    <div>${firstMessage.substring(0, 30)}${firstMessage.length > 30 ? '...' : ''}</div>
-                    <div class="history-date">${session.date}</div>
-                `;
+                historyItem.innerHTML = `<div>${firstMessage.substring(0, 30)}${firstMessage.length > 30 ? '...' : ''}</div><div class="history-date">${session.date}</div>`;
                 historyItem.addEventListener('click', () => {
-                    loadHistorySession(chatHistory.length - 1 - index);
+                    loadHistorySession(session.id);
                     closeMenus();
                 });
-                historyList.appendChild(historyItem);
+                DOMElements.historyList.appendChild(historyItem);
             });
         }
 
-        // بارگذاری یک session از تاریخچه
-        function loadHistorySession(index) {
-            if (index >= 0 && index < chatHistory.length) {
-                currentSession = [...chatHistory[index].session];
-                renderChatHistory();
+        function loadHistorySession(sessionId) {
+            const session = chatHistory.find(s => s.id === sessionId);
+            if (session) {
+                currentSessionId = sessionId;
+                renderChat(session.messages);
             }
         }
 
-        // پاک کردن تاریخچه
         function clearHistory() {
             if (confirm('آیا از پاک کردن همه تاریخچه گفتگو مطمئن هستید؟')) {
                 chatHistory = [];
-                currentSession = [];
-                try {
-                    localStorage.removeItem('persianAI_chatHistory');
-                } catch (e) {
-                    console.error('خطا در پاک کردن تاریخچه:', e);
-                }
+                currentSessionId = null;
+                localStorage.removeItem('persianAI_chatHistory');
                 renderHistoryList();
-                renderChatHistory();
+                renderChat([WELCOME_MESSAGE]);
             }
         }
 
-        // باز کردن منو
-        function openMenu(menu) {
-            menu.classList.add('active');
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // اگر منوی تاریخچه است، لیست را رندر کن
-            if (menu.id === 'history-menu') {
-                renderHistoryList();
-            }
+        // --- مدیریت UI/UX ---
+        function renderChat(messages) {
+            DOMElements.chatBox.innerHTML = '';
+            messages.forEach(msg => displayMessage(msg.text, msg.sender, msg.time, false));
+            DOMElements.chatBox.scrollTop = DOMElements.chatBox.scrollHeight;
         }
 
-        // بستن منوها
-        function closeMenus() {
-            historyMenu.classList.remove('active');
-            settingsMenu.classList.remove('active');
-            overlay.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-
-        // تشخیص قصد کاربر با دقت بیشتر
-        function detectIntent(message) {
-            const lowerMessage = message.toLowerCase().replace(/[^\w\s]/gi, '');
-            
-            for (const [intent, data] of Object.entries(knowledgeBase)) {
-                for (const pattern of data.patterns) {
-                    if (lowerMessage.includes(pattern.toLowerCase())) {
-                        return intent;
-                    }
-                }
-            }
-            
-            return "unknown";
-        }
-
-        // تولید پاسخ پیشرفته‌تر
-        function generateResponse(intent, userMessage) {
-            if (knowledgeBase[intent] && knowledgeBase[intent].responses.length > 0) {
-                const responses = knowledgeBase[intent].responses;
-                return responses[Math.floor(Math.random() * responses.length)];
-            }
-            
-            // مدیریت محاسبات ریاضی پیشرفته‌تر
-            if (intent === 'math' || userMessage.match(/[\d+\-*/^sqrt()]+/)) {
-                try {
-                    let expr = userMessage.replace(/ریشه/g, 'Math.sqrt').replace(/توان/g, '**').replace(/[^0-9+\-*/^()sqrtMath. ]/g, '');
-                    const result = eval(expr);
-                    return `نتیجه محاسبه: ${result}. اگر معادله پیچیده‌تری داری، بگو تا حل کنم!`;
-                } catch (e) {
-                    return "متأسفم، نمی‌توانم این محاسبه را انجام دهم. لطفاً فرمول را واضح‌تر بنویس.";
-                }
-            }
-            
-            // مدیریت برنامه‌نویسی با مثال‌های بیشتر
-            if (intent === 'programming') {
-                if (userMessage.includes('جاوا اسکریپت')) {
-                    return "در جاوااسکریپت، برای ایجاد یک آرایه: let arr = [1, 2, 3]; و برای سورت: arr.sort(); سوال بیشتری داری؟";
-                } else if (userMessage.includes('پایتون')) {
-                    return "در پایتون، برای چاپ: print('سلام دنیا') و برای لیست: my_list = [1, 2, 3]. چه کد دیگه‌ای نیاز داری؟";
-                } else {
-                    return "برنامه‌نویسی رو دوست دارم! مثلاً الگوریتم جستجوی باینری رو می‌خوای توضیح بدم؟";
-                }
-            }
-            
-            // پاسخ پیش فرض هوشمندانه‌تر
-            const responses = [
-                `جالب است! "${userMessage}" رو بررسی کردم، اما دقیق متوجه نشدم. می‌تونی جزئیات بیشتری بدی؟`,
-                "من در حال یادگیری‌ام و می‌تونم در مورد موضوعات مختلفی حرف بزنم. مثلاً در مورد علم، تاریخ یا حتی جوک! 😊",
-                "این سوال خوبیه! اگر در مورد برنامه‌نویسی، ریاضی یا هر چیز دیگه‌ای باشه، می‌تونم کمک کنم.",
-                "متأسفم اگر پاسخ کاملی ندارم، اما بیایم با هم فکر کنیم: چه جنبه‌ای از این موضوع مهمه؟",
-                "برای پاسخ دقیق‌تر، می‌تونم شبیه‌سازی کنم. مثلاً اگر سوال برنامه‌نویسی باشه، کد نمونه می‌دم!"
-            ];
-            
-            return responses[Math.floor(Math.random() * responses.length)];
-        }
-
-        // نمایش پیام در چت
         function displayMessage(text, sender, time = null, save = true) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}-message`;
-            
-            const avatar = document.createElement('div');
-            avatar.className = 'avatar';
-            
-            const avatarIcon = document.createElement('i');
-            avatarIcon.className = sender === 'user' ? 'fas fa-user' : 'fas fa-robot';
-            avatar.appendChild(avatarIcon);
-            
-            const messageContent = document.createElement('div');
-            messageContent.className = 'message-content';
-            
-            const messageText = document.createElement('div');
-            messageText.className = 'message-text';
-            messageText.textContent = text;
-            
-            const messageTime = document.createElement('div');
-            messageTime.className = 'message-time';
-            messageTime.textContent = time || new Date().toLocaleTimeString('fa-IR');
-            
-            messageContent.appendChild(messageText);
-            messageContent.appendChild(messageTime);
-            
-            messageDiv.appendChild(avatar);
-            messageDiv.appendChild(messageContent);
-            
-            chatBox.appendChild(messageDiv);
-            
-            // اسکرول به پایین
-            chatBox.scrollTop = chatBox.scrollHeight;
-            
-            // ذخیره در تاریخچه اگر فعال باشد
-            if (save) {
-                saveToHistory(text, sender);
-            }
-
-            // پخش اعلان اگر پیام AI باشد
-            if (sender === 'ai') {
-                notify();
-            }
+            messageDiv.innerHTML = `
+                <div class="avatar">
+                    <i class="fas fa-${sender === 'user' ? 'user' : 'robot'}"></i>
+                </div>
+                <div class="message-content">
+                    <div class="message-text">${text}</div>
+                    <div class="message-time">${time || new Date().toLocaleTimeString('fa-IR')}</div>
+                </div>
+            `;
+            DOMElements.chatBox.appendChild(messageDiv);
+            DOMElements.chatBox.scrollTop = DOMElements.chatBox.scrollHeight;
+            if (save) saveToHistory(text, sender);
+            if (sender === 'ai') notify();
         }
 
-        // نمایش نشانگر تایپ
+        function openMenu(menu) {
+            menu.classList.add('active');
+            DOMElements.overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            if (menu.id === 'history-menu') renderHistoryList();
+        }
+
+        function closeMenus() {
+            DOMElements.historyMenu.classList.remove('active');
+            DOMElements.settingsMenu.classList.remove('active');
+            DOMElements.overlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
         function showTypingIndicator() {
-            typingIndicator.style.display = 'block';
-            chatBox.scrollTop = chatBox.scrollHeight;
+            DOMElements.typingIndicator.style.display = 'block';
+            DOMElements.chatBox.scrollTop = DOMElements.chatBox.scrollHeight;
         }
 
-        // پنهان کردن نشانگر تایپ
         function hideTypingIndicator() {
-            typingIndicator.style.display = 'none';
+            DOMElements.typingIndicator.style.display = 'none';
         }
 
-        // پردازش پیام کاربر و تولید پاسخ
-        function sendMessage() {
-            const message = userInput.value.trim();
+        function notify() {
+            if (DOMElements.notificationSoundToggle.checked) DOMElements.notificationAudio.play();
+            if (DOMElements.vibrationToggle.checked && 'vibrate' in navigator) navigator.vibrate(200);
+        }
+
+        // --- منطق چت‌بات و پاسخ‌ها ---
+        function detectIntent(message) {
+            const lowerMessage = message.toLowerCase().replace(/[^\w\s]/gi, '');
+            for (const [intent, data] of Object.entries(knowledgeBase)) {
+                if (data.patterns.some(pattern => lowerMessage.includes(pattern.toLowerCase()))) {
+                    return intent;
+                }
+            }
+            return "default";
+        }
+
+        function generateResponse(intent, userMessage) {
+            // منطق پاسخ‌دهی برای intent های خاص
+            if (intent === 'time') {
+                return `هم اکنون ساعت ${new Date().toLocaleTimeString('fa-IR')} است. امروز ${new Date().toLocaleDateString('fa-IR')} است.`;
+            }
             
-            if (!message) return;
-            
-            // نمایش پیام کاربر
-            displayMessage(message, 'user');
-            userInput.value = '';
-            
-            // غیرفعال کردن ورودی تا دریافت پاسخ
-            userInput.disabled = true;
-            sendBtn.disabled = true;
-            
-            // نمایش نشانگر تایپ
-            showTypingIndicator();
-            
-            // تاخیر برای طبیعی‌تر شدن (بین 1 تا 2 ثانیه)
-            setTimeout(() => {
+            // پردازش ایمن محاسبات ریاضی
+            if (intent === 'math' || userMessage.match(/^[\d\s+\-*/()^.]+$/)) {
                 try {
-                    // تشخیص قصد کاربر و تولید پاسخ
-                    const intent = detectIntent(message);
-                    const response = generateResponse(intent, message);
-                    
-                    // پنهان کردن نشانگر تایپ و نمایش پاسخ
-                    hideTypingIndicator();
-                    displayMessage(response, 'ai');
-                } catch (error) {
-                    hideTypingIndicator();
-                    displayMessage('متأسفانه در پردازش پیام شما خطایی رخ داده است. لطفاً دوباره امتحان کنید.', 'ai');
-                    console.error('Error:', error);
-                } finally {
-                    // فعال کردن مجدد ورودی
-                    userInput.disabled = false;
-                    sendBtn.disabled = false;
-                    userInput.focus();
+                    const mathjsCode = userMessage.replace(/ریشه/g, 'sqrt').replace(/توان/g, '^');
+                    const result = mathEval(mathjsCode); // استفاده از تابع ایمن
+                    if (result !== undefined) {
+                        return `نتیجه محاسبه: ${result}`;
+                    }
+                } catch (e) {
+                    return "متاسفم، نمی‌توانم این محاسبه را انجام دهم. لطفاً فرمول را واضح‌تر بنویسید.";
                 }
-            }, Math.random() * 1000 + 1000);
+            }
+            
+            // پاسخ از پایگاه دانش
+            const responses = knowledgeBase[intent].responses;
+            if (responses && responses.length > 0) {
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+            
+            return knowledgeBase.default.responses[Math.floor(Math.random() * knowledgeBase.default.responses.length)];
         }
 
-        // مقداردهی اولیه
-        function initialize() {
-            // بارگذاری تنظیمات
+        // تابع ایمن برای پردازش عبارات ریاضی
+        function mathEval(expression) {
+            // یک ماشین حساب ساده و ایمن
+            const operators = {
+                '+': (a, b) => a + b,
+                '-': (a, b) => a - b,
+                '*': (a, b) => a * b,
+                '/': (a, b) => a / b,
+                '^': (a, b) => Math.pow(a, b),
+                'sqrt': (a) => Math.sqrt(a)
+            };
+            const tokens = expression.match(/(\d+\.?\d*|[\+\-\*\/\^]|\(|\)|sqrt)/g) || [];
+            
+            function precedence(op) {
+                if (op === '+' || op === '-') return 1;
+                if (op === '*' || op === '/') return 2;
+                if (op === '^' || op === 'sqrt') return 3;
+                return 0;
+            }
+
+            function applyOp(ops, values) {
+                const op = ops.pop();
+                const val2 = values.pop();
+                if (op === 'sqrt') {
+                    values.push(operators[op](val2));
+                } else {
+                    const val1 = values.pop();
+                    values.push(operators[op](val1, val2));
+                }
+            }
+
+            let values = [];
+            let ops = [];
+
+            for (let i = 0; i < tokens.length; i++) {
+                const token = tokens[i];
+                if (!isNaN(parseFloat(token))) {
+                    values.push(parseFloat(token));
+                } else if (token === '(') {
+                    ops.push(token);
+                } else if (token === ')') {
+                    while (ops.length > 0 && ops[ops.length - 1] !== '(') {
+                        applyOp(ops, values);
+                    }
+                    ops.pop(); // Pop '('
+                } else if (operators[token]) {
+                    while (ops.length > 0 && precedence(ops[ops.length - 1]) >= precedence(token)) {
+                        applyOp(ops, values);
+                    }
+                    ops.push(token);
+                } else if (token === 'sqrt') {
+                    ops.push(token);
+                }
+            }
+
+            while (ops.length > 0) {
+                applyOp(ops, values);
+            }
+            return values.pop();
+        }
+
+        function sendMessage() {
+            const message = DOMElements.userInput.value.trim();
+            if (!message) return;
+
+            displayMessage(message, 'user');
+            DOMElements.userInput.value = '';
+            DOMElements.userInput.disabled = true;
+            DOMElements.sendBtn.disabled = true;
+
+            showTypingIndicator();
+
+            setTimeout(() => {
+                const intent = detectIntent(message);
+                const response = generateResponse(intent, message);
+                hideTypingIndicator();
+                displayMessage(response, 'ai');
+                DOMElements.userInput.disabled = false;
+                DOMElements.sendBtn.disabled = false;
+                DOMElements.userInput.focus();
+            }, Math.random() * 1500 + 1000);
+        }
+        
+        // --- مقداردهی اولیه و رویدادها ---
+        function init() {
             loadSettings();
-
-            // رویدادهای کلیک
-            historyBtn.addEventListener('click', () => openMenu(historyMenu));
-            settingsBtn.addEventListener('click', () => openMenu(settingsMenu));
-            overlay.addEventListener('click', closeMenus);
-            closeMenuButtons.forEach(btn => btn.addEventListener('click', closeMenus));
-            clearHistoryBtn.addEventListener('click', clearHistory);
-
-            // رویدادهای تنظیمات
-            darkModeToggle.addEventListener('change', () => {
-                applyDarkMode();
-                saveSettings();
-            });
-            largeFontToggle.addEventListener('change', () => {
-                applyLargeFont();
-                saveSettings();
-            });
-            notificationSoundToggle.addEventListener('change', saveSettings);
-            vibrationToggle.addEventListener('change', saveSettings);
-            saveHistoryToggle.addEventListener('change', saveSettings);
-
-            // امکان ارسال با کلید Enter
-            userInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    sendMessage();
-                }
-            });
-
-            // رویداد کلیک برای دکمه ارسال
-            sendBtn.addEventListener('click', sendMessage);
-
-            // بارگذاری اولیه
-            renderChatHistory();
+            renderChat(chatHistory.length > 0 ? chatHistory[chatHistory.length - 1].messages : [WELCOME_MESSAGE]);
             renderHistoryList();
-            userInput.focus();
+            
+            DOMElements.historyBtn.addEventListener('click', () => openMenu(DOMElements.historyMenu));
+            DOMElements.settingsBtn.addEventListener('click', () => openMenu(DOMElements.settingsMenu));
+            DOMElements.overlay.addEventListener('click', closeMenus);
+            DOMElements.closeMenuButtons.forEach(btn => btn.addEventListener('click', closeMenus));
+            DOMElements.clearHistoryBtn.addEventListener('click', clearHistory);
+
+            DOMElements.darkModeToggle.addEventListener('change', () => { applyTheme(); saveSettings(); });
+            DOMElements.largeFontToggle.addEventListener('change', () => { applyTheme(); saveSettings(); });
+            DOMElements.notificationSoundToggle.addEventListener('change', saveSettings);
+            DOMElements.vibrationToggle.addEventListener('change', saveSettings);
+            DOMElements.saveHistoryToggle.addEventListener('change', saveSettings);
+
+            DOMElements.userInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+            DOMElements.sendBtn.addEventListener('click', sendMessage);
+
+            DOMElements.userInput.focus();
         }
 
-        // شروع برنامه زمانی که DOM کاملاً لود شده
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initialize);
+            document.addEventListener('DOMContentLoaded', init);
         } else {
-            initialize();
+            init();
         }
     </script>
 </body>
